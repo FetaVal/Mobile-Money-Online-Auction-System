@@ -18,7 +18,11 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+<<<<<<< HEAD
 from auctions.views import home, sell_item, item_detail, place_bid, verify_captcha, buy_now, submit_review, seller_profile, view_cart, add_to_cart, remove_from_cart, checkout, chatbot, inbox, conversation, send_message, start_conversation, search_users, change_item_status, admin_dashboard, admin_users, admin_items, admin_payments, admin_fraud_alerts, admin_toggle_user_status, admin_update_bypass_permissions, admin_change_item_status, admin_export_payments, admin_export_fraud_alerts, admin_resolve_fraud_alert, admin_dismiss_fraud_alert, admin_bulk_resolve_alerts, admin_seller_applications, admin_approve_seller, admin_reject_seller, get_cities, get_areas, calculate_shipping
+=======
+from auctions.views import home, sell_item, item_detail, place_bid, verify_captcha, buy_now, submit_review, seller_profile, view_cart, add_to_cart, remove_from_cart, checkout, chatbot, inbox, conversation, send_message, start_conversation, change_item_status, admin_dashboard, admin_users, admin_items, admin_payments, admin_fraud_alerts, admin_toggle_user_status, admin_update_bypass_permissions, admin_change_item_status, admin_export_payments, admin_export_fraud_alerts, admin_resolve_fraud_alert, admin_dismiss_fraud_alert, admin_bulk_resolve_alerts, admin_seller_applications, admin_approve_seller, admin_reject_seller, get_cities, get_areas
+>>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
 from payments.ussd_views import ussd_simulator, ussd_initiate, ussd_respond, ussd_wallet_deposit, ussd_wallet_withdraw, ussd_wallet_initiate, ussd_wallet_respond
 from payments.views import card_payment_page, process_card_payment, paypal_login_page, process_paypal_payment
 
@@ -40,13 +44,19 @@ urlpatterns = [
     path('checkout/', checkout, name='checkout'),
     path('get-cities/<str:country_code>/', get_cities, name='get_cities'),
     path('get-areas/<str:city>/', get_areas, name='get_areas'),
+<<<<<<< HEAD
     path('calculate-shipping/', calculate_shipping, name='calculate_shipping'),
+=======
+>>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
     path('chatbot/', chatbot, name='chatbot'),
     path('messages/', inbox, name='inbox'),
     path('messages/<int:user_id>/', conversation, name='conversation'),
     path('messages/send/', send_message, name='send_message'),
     path('messages/start/<int:user_id>/', start_conversation, name='start_conversation'),
+<<<<<<< HEAD
     path('api/search-users/', search_users, name='search_users'),
+=======
+>>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
     path('ussd/', ussd_simulator, name='ussd_simulator'),
     path('ussd/initiate/', ussd_initiate, name='ussd_initiate'),
     path('ussd/respond/', ussd_respond, name='ussd_respond'),

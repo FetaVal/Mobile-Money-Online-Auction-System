@@ -40,9 +40,12 @@ localPort = 34439
 externalPort = 3002
 
 [[ports]]
+<<<<<<< HEAD
 localPort = 35169
 externalPort = 3000
 
 [[ports]]
+=======
+>>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
 localPort = 41435
 externalPort = 3001

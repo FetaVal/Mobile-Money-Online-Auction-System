@@ -225,6 +225,7 @@
                         </div>
                         
                         <div class="mb-4">
+<<<<<<< HEAD
                             <div style="padding: 15px; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border: 2px solid #10b981; border-radius: 8px;">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="pickup_option" name="pickup_option" value="1" style="width: 20px; height: 20px; margin-top: 2px;">
@@ -234,6 +235,14 @@
                                     </label>
                                     <small class="d-block mt-2" style="color: #065f46;">Select this if you want to collect items directly from sellers and avoid shipping costs</small>
                                 </div>
+=======
+                            <div class="form-check" style="padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                                <input class="form-check-input" type="checkbox" id="pickup_option" name="pickup_option" value="1">
+                                <label class="form-check-label fw-bold" for="pickup_option">
+                                    <i class="fas fa-store"></i> Pick up from seller's location (Free)
+                                </label>
+                                <small class="d-block text-muted mt-1">Select this if you want to collect items directly from sellers</small>
+>>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
                             </div>
                         </div>
                         
@@ -357,6 +366,7 @@
                         <div style="flex: 1;">
                             <div style="font-weight: 600; color: #1a1a2e;">{{ cart_item.item.title }}</div>
                             <div style="font-size: 14px; color: #64748b;">Seller: {{ cart_item.item.seller.username }}</div>
+<<<<<<< HEAD
                             
                             <div style="display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap;">
                                 {% if cart_item.item.free_shipping %}
@@ -377,6 +387,9 @@
                             </div>
                             
                             <div style="font-weight: 600; color: #6366f1; margin-top: 8px;">UGX {{ cart_item.item.current_price|floatformat:0 }}</div>
+=======
+                            <div style="font-weight: 600; color: #6366f1; margin-top: 5px;">UGX {{ cart_item.item.current_price|floatformat:0 }}</div>
+>>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
                         </div>
                     </div>
                     {% endfor %}
@@ -580,12 +593,16 @@ if (pickupCheckbox) {
             deliveryAreaSelect.disabled = true;
             deliveryCitySelect.required = false;
             deliveryAreaSelect.required = false;
+<<<<<<< HEAD
             updateShippingCost();
+=======
+>>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
         } else {
             deliveryCitySelect.disabled = false;
             deliveryAreaSelect.disabled = false;
             deliveryCitySelect.required = true;
             deliveryAreaSelect.required = true;
+<<<<<<< HEAD
             updateShippingCost();
         }
     });
@@ -687,5 +704,10 @@ function updateShippingCost() {
 if (deliveryAreaSelect) {
     deliveryAreaSelect.addEventListener('change', updateShippingCost);
 }
+=======
+        }
+    });
+}
+>>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
 </script>
 {% endblock %}

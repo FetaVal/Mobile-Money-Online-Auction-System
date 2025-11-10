@@ -267,6 +267,7 @@
                         <i class="fas fa-user-plus"></i> Follow
                     {% endif %}
                 </button>
+<<<<<<< HEAD
                 <a href="{% url 'start_conversation' seller.id %}" class="btn btn-lg" style="background: #10b981; color: white; font-weight: 600; padding: 12px 40px; border: 2px solid #10b981; border-radius: 30px; transition: all 0.3s; text-decoration: none; margin-right: 15px;">
                     <i class="fas fa-comments"></i> Chat
                 </a>
@@ -280,6 +281,11 @@
                 <button class="btn btn-lg" data-bs-toggle="modal" data-bs-target="#shareProfileModal" data-profile-username="{{ seller.username }}" data-profile-url="{% url 'seller_profile' seller.username %}" style="background: white; color: #6366f1; font-weight: 600; padding: 12px 40px; border: 2px solid white; border-radius: 30px; transition: all 0.3s;">
                     <i class="fas fa-share-alt"></i> Share Profile
                 </button>
+=======
+                <a href="{% url 'start_conversation' seller.id %}" class="btn btn-lg" style="background: #10b981; color: white; font-weight: 600; padding: 12px 40px; border: 2px solid #10b981; border-radius: 30px; transition: all 0.3s; text-decoration: none;">
+                    <i class="fas fa-comments"></i> Chat
+                </a>
+>>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
             </div>
             {% endif %}
         </div>
@@ -400,6 +406,7 @@
         {% endif %}
     </div>
 </div>
+<<<<<<< HEAD
 
 <!-- Share Profile Modal -->
 <div class="modal fade" id="shareProfileModal" tabindex="-1" aria-labelledby="shareProfileModalLabel" aria-hidden="true">
@@ -430,10 +437,13 @@
         </div>
     </div>
 </div>
+=======
+>>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
 {% endblock %}
 
 {% block extra_js %}
 <script>
+<<<<<<< HEAD
 // Helper function to get CSRF token
 function getCookie(name) {
     let cookieValue = null;
@@ -450,6 +460,8 @@ function getCookie(name) {
     return cookieValue;
 }
 
+=======
+>>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
 document.addEventListener('DOMContentLoaded', function() {
     const followBtn = document.getElementById('follow-btn');
     
@@ -508,6 +520,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+<<<<<<< HEAD
 
     // Share Profile functionality
     let searchTimeout;
@@ -605,6 +618,8 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error:', error);
         });
     };
+=======
+>>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
 });
 </script>
 {% endblock %}

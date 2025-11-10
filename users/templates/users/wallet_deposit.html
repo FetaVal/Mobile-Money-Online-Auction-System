@@ -222,6 +222,7 @@
                 <i class="fas fa-globe"></i> Select Your Country
             </div>
             
+<<<<<<< HEAD
             <div class="form-group">
                 <select name="country" 
                         id="country-select" 
@@ -237,6 +238,23 @@
                         </option>
                     {% endfor %}
                 </select>
+=======
+            <div class="country-selector">
+                {% for country in countries %}
+                    <div class="country-option" onclick="selectCountry('{{ country.code }}', '{{ country.name }}')">
+                        <input type="radio" 
+                               name="country" 
+                               value="{{ country.code }}" 
+                               id="country-{{ country.code }}" 
+                               {% if country.code == 'UG' %}checked{% endif %}>
+                        <span class="flag-icon flag-icon-{{ country.code|lower }}" style="font-size: 2rem;"></span>
+                        <div>
+                            <div style="font-weight: 600;">{{ country.name }}</div>
+                            <small style="color: #64748b;">{{ country.currency }}</small>
+                        </div>
+                    </div>
+                {% endfor %}
+>>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
             </div>
             
             <div class="section-title">
@@ -327,11 +345,20 @@
 </div>
 
 <script>
+<<<<<<< HEAD
 function updatePaymentMethods() {
     const countrySelect = document.getElementById('country-select');
     const selectedCountry = countrySelect.value;
     
     if (selectedCountry === 'UG') {
+=======
+function selectCountry(code, name) {
+    document.querySelectorAll('.country-option').forEach(opt => opt.classList.remove('selected'));
+    event.currentTarget.classList.add('selected');
+    document.getElementById('country-' + code).checked = true;
+    
+    if (code === 'UG') {
+>>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
         showPaymentType('local');
     } else {
         showPaymentType('international');
@@ -339,6 +366,7 @@ function updatePaymentMethods() {
 }
 
 function showPaymentType(type) {
+<<<<<<< HEAD
     const localTab = document.querySelector('[onclick="showPaymentType(\'local\')"]');
     const intlTab = document.querySelector('[onclick="showPaymentType(\'international\')"]');
     
@@ -350,6 +378,15 @@ function showPaymentType(type) {
         document.getElementById('international-methods').style.display = 'none';
     } else {
         intlTab.classList.add('active');
+=======
+    document.querySelectorAll('.payment-type-tab').forEach(tab => tab.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    
+    if (type === 'local') {
+        document.getElementById('local-methods').style.display = 'block';
+        document.getElementById('international-methods').style.display = 'none';
+    } else {
+>>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
         document.getElementById('local-methods').style.display = 'none';
         document.getElementById('international-methods').style.display = 'block';
     }

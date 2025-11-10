@@ -18,6 +18,7 @@ The platform features a modern homepage with a hero section, professional search
 - Logic checks `user.last_login` before login to determine first-time vs returning status
 - Applied consistently across both regular login and 2FA verification flows
 
+<<<<<<< HEAD
 **Profile Sharing Feature (Nov 2025):**
 - **Share Profile in Chat**: Users can share any profile (own or others) via chat messages with other users
 - **Smart User Search**: Modal with real-time search functionality (300ms debounce, 2+ characters required)
@@ -27,6 +28,8 @@ The platform features a modern homepage with a hero section, professional search
 - **Search API**: New `/api/search-users/` endpoint for searching users by username (excludes self, returns up to 10 results)
 - **Security**: CSRF protection, prevents self-messaging, validates all inputs
 
+=======
+>>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
 **Auto-Dismissing Notifications (Nov 2025):**
 - All system notifications (success, info, warning, error) automatically dismiss after 5 seconds
 - Uses Bootstrap 5 Alert API for smooth fade-out animation
@@ -55,6 +58,7 @@ The platform features a modern homepage with a hero section, professional search
 - **Admin Bypass Permissions System (Nov 2025)**: Admins can grant selective bypasses (account age, rapid bidding, fraud detection, or all restrictions) per user via clean modal interface in Users dashboard; tracks who granted bypass and when; superusers auto-exempt from ALL restrictions
 - **Architect-verified**: Zero critical bugs, production-ready with comprehensive security safeguards
 
+<<<<<<< HEAD
 **Shipping & Checkout Enhancements (Nov 2025):**
 - **Accurate shipping cost display**: Cart and checkout pages now show actual shipping fees from item.shipping_cost_base instead of hardcoded "FREE"
 - **Shipping method badges**: Each item in cart/checkout displays visual badges (FREE SHIPPING, PICKUP, +UGX cost) based on seller settings
@@ -66,6 +70,8 @@ The platform features a modern homepage with a hero section, professional search
 - **Dynamic shipping calculation**: Real-time shipping cost updates when delivery city/area is selected; handles pickup option, free shipping items, and gracefully falls back to safe defaults on errors (prevents NaN corruption)
 - **Cancel button styling**: Removed underline from "Cancel" links in sell item form for cleaner UI
 
+=======
+>>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
 ### Technical Implementations
 -   **Core Auction System:** Category management, multi-image support, advanced filtering, shopping cart, and "Buy Now" functionality with atomic updates and wallet integration.
 -   **Payment Integration:** Country-based routing for payment methods, including local (MTN, Airtel Money via Flutterwave, M-Pesa) and international (Stripe, PayPal, Bank Transfer) options. Supports multi-currency, a demo mode, USSD simulator with SMS confirmations, and a 5% platform tax. Includes HMAC signature verification for webhooks, replay attack protection, idempotent updates, and daily reconciliation.
