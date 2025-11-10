@@ -539,7 +539,6 @@ def buy_now(request, pk):
         
         WalletTransaction.objects.create(
             wallet=wallet,
-<<<<<<< HEAD
             transaction_type='payment',
             amount=-total_amount,
             balance_after=wallet.balance,
@@ -547,12 +546,6 @@ def buy_now(request, pk):
             payment_method='wallet',
             payment_reference=f'BUYNOW-{pk}-{timezone.now().timestamp()}',
             status='completed'
-=======
-            transaction_type='purchase',
-            amount=-total_amount,
-            description=f'Buy Now purchase: {item.title}',
-            reference=f'BUYNOW-{pk}-{timezone.now().timestamp()}'
->>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
         )
         
         seller_wallet, _ = Wallet.objects.get_or_create(user=item.seller)
@@ -563,7 +556,6 @@ def buy_now(request, pk):
             wallet=seller_wallet,
             transaction_type='sale',
             amount=seller_receives,
-<<<<<<< HEAD
             balance_after=seller_wallet.balance,
             description=f'Sale: {item.title} (Buy Now, 5% platform fee deducted)',
             payment_method='wallet',
@@ -584,18 +576,6 @@ def buy_now(request, pk):
             payment_method='platform_fee',
             payment_reference=f'TAX-{pk}-{timezone.now().timestamp()}',
             status='completed'
-=======
-            description=f'Sale: {item.title} (Buy Now, 5% platform fee deducted)',
-            reference=f'BUYNOW-SALE-{pk}-{timezone.now().timestamp()}'
-        )
-        
-        WalletTransaction.objects.create(
-            wallet=seller_wallet,
-            transaction_type='platform_tax',
-            amount=-platform_tax,
-            description=f'Platform tax (5%) for {item.title}',
-            reference=f'TAX-{pk}-{timezone.now().timestamp()}'
->>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
         )
         
         # Create transaction log
@@ -751,15 +731,11 @@ def seller_profile(request, username):
 
 @login_required
 def view_cart(request):
-<<<<<<< HEAD
     from decimal import Decimal
-=======
->>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
     cart, created = Cart.objects.get_or_create(user=request.user)
     cart_items = cart.items.select_related('item__seller').all()
     total = cart.total()
     
-<<<<<<< HEAD
     shipping_estimate = Decimal('0')
     for cart_item in cart_items:
         if not cart_item.item.free_shipping and cart_item.item.shipping_cost_base:
@@ -767,17 +743,12 @@ def view_cart(request):
     
     cart_total = total + shipping_estimate
     
-=======
->>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
     context = {
         'cart': cart,
         'cart_items': cart_items,
         'total': total,
-<<<<<<< HEAD
         'shipping_estimate': shipping_estimate,
         'cart_total': cart_total,
-=======
->>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
     }
     return render(request, 'auctions/cart.html', context)
 
@@ -1242,7 +1213,6 @@ def start_conversation(request, user_id):
     return redirect('conversation', user_id=user_id)
 
 @login_required
-<<<<<<< HEAD
 def search_users(request):
     """API endpoint to search for users by username"""
     query = request.GET.get('q', '').strip()
@@ -1259,8 +1229,6 @@ def search_users(request):
     return JsonResponse({'users': user_list})
 
 @login_required
-=======
->>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
 def change_item_status(request, item_id):
     """Change the status of an item (private, off_sale, sold, active)"""
     from django.http import JsonResponse
@@ -1278,7 +1246,6 @@ def change_item_status(request, item_id):
             return JsonResponse({'success': False, 'error': 'Invalid status'}, status=400)
         
         item.status = new_status
-<<<<<<< HEAD
         
         # When marking as sold, automatically set the winner to the highest bidder
         if new_status == 'sold' and not item.winner:
@@ -1290,9 +1257,6 @@ def change_item_status(request, item_id):
                 item.save(update_fields=['status'])
         else:
             item.save(update_fields=['status'])
-=======
-        item.save(update_fields=['status'])
->>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
         
         return JsonResponse({
             'success': True,
@@ -1637,7 +1601,6 @@ def admin_change_item_status(request, item_id):
             return JsonResponse({'success': False, 'error': 'Invalid status'}, status=400)
         
         item.status = new_status
-<<<<<<< HEAD
         
         # When marking as sold, automatically set the winner to the highest bidder
         if new_status == 'sold' and not item.winner:
@@ -1649,9 +1612,6 @@ def admin_change_item_status(request, item_id):
                 item.save(update_fields=['status'])
         else:
             item.save(update_fields=['status'])
-=======
-        item.save(update_fields=['status'])
->>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
         
         return JsonResponse({
             'success': True,
@@ -1901,7 +1861,6 @@ def get_areas(request, city):
     ).values_list('area', flat=True).order_by('area')
     
     return JsonResponse({'areas': list(areas)})
-<<<<<<< HEAD
 
 @login_required
 def calculate_shipping(request):
@@ -1940,5 +1899,3 @@ def calculate_shipping(request):
         'tax_amount': float(tax_amount),
         'total': float(total)
     })
-=======
->>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7

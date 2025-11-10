@@ -490,17 +490,12 @@ class TwoFactorAuth(models.Model):
         return codes
     
     def use_backup_code(self, code):
-<<<<<<< HEAD
         # Ensure backup_codes is a list (JSONField sometimes returns string)
         codes = self.backup_codes if isinstance(self.backup_codes, list) else []
         
         if code.upper() in codes:
             codes.remove(code.upper())
             self.backup_codes = codes
-=======
-        if code.upper() in self.backup_codes:
-            self.backup_codes.remove(code.upper())
->>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
             self.save(update_fields=['backup_codes'])
             return True
         return False

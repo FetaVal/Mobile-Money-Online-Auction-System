@@ -111,15 +111,12 @@ def ussd_respond(request):
             return handle_listing_category(session, user_input)
         elif session.stage == 'listing_price':
             return handle_listing_price(session, user_input)
-<<<<<<< HEAD
         elif session.stage == 'listing_buy_now':
             return handle_listing_buy_now(session, user_input)
         elif session.stage == 'listing_shipping_cost':
             return handle_listing_shipping_cost(session, user_input)
         elif session.stage == 'listing_shipping_method':
             return handle_listing_shipping_method(session, user_input)
-=======
->>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
         elif session.stage == 'listing_duration':
             return handle_listing_duration(session, user_input)
         elif session.stage == 'listing_review':
@@ -808,7 +805,6 @@ def handle_listing_price(session, user_input):
             })
         
         session.session_data['listing_draft']['starting_price'] = str(price)
-<<<<<<< HEAD
         session.stage = 'listing_buy_now'
         session.save()
         
@@ -819,21 +815,6 @@ def handle_listing_price(session, user_input):
         return JsonResponse({
             'message': message,
             'stage': 'listing_buy_now'
-=======
-        session.stage = 'listing_duration'
-        session.save()
-        
-        message = "Select auction duration:\n\n"
-        message += "1. 24 hours\n"
-        message += "2. 48 hours (2 days)\n"
-        message += "3. 72 hours (3 days)\n"
-        message += "4. 7 days\n\n"
-        message += "0. Cancel"
-        
-        return JsonResponse({
-            'message': message,
-            'stage': 'listing_duration'
->>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
         })
         
     except (ValueError, InvalidOperation):
@@ -842,7 +823,6 @@ def handle_listing_price(session, user_input):
             'stage': 'listing_price'
         })
 
-<<<<<<< HEAD
 def handle_listing_buy_now(session, user_input):
     """Handle Buy Now price input"""
     if user_input == '0' or not user_input.strip():
@@ -958,8 +938,6 @@ def handle_listing_shipping_method(session, user_input):
         'stage': 'listing_duration'
     })
 
-=======
->>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
 def handle_listing_duration(session, user_input):
     """Handle auction duration selection"""
     if user_input == '0':
@@ -995,7 +973,6 @@ def handle_listing_duration(session, user_input):
     message += f"Description: {draft['description'][:30]}...\n"
     message += f"Category: {draft['category_name']}\n"
     message += f"Price: UGX {Decimal(draft['starting_price']):,.0f}\n"
-<<<<<<< HEAD
     
     # Add Buy Now if available
     if draft.get('buy_now_price'):
@@ -1018,8 +995,6 @@ def handle_listing_duration(session, user_input):
     if draft.get('shipping_method'):
         message += f"Delivery: {method_labels.get(draft['shipping_method'], 'N/A')}\n"
     
-=======
->>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
     message += f"Duration: {draft['duration_label']}\n\n"
     message += "1. Confirm & Publish\n"
     message += "0. Cancel"
@@ -1118,14 +1093,11 @@ def handle_listing_pin_confirmation(session, pin):
         duration_hours = int(draft['duration_hours'])
         end_time = timezone.now() + timedelta(hours=duration_hours)
         
-<<<<<<< HEAD
         # Determine shipping options from shipping_method
         shipping_method = draft.get('shipping_method', 'both')
         free_shipping = shipping_method in ['free_shipping', 'both']
         pickup_available = shipping_method in ['pickup', 'both']
         
-=======
->>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
         # Create item
         item = Item.objects.create(
             seller=session.user,
@@ -1134,13 +1106,10 @@ def handle_listing_pin_confirmation(session, pin):
             description=draft['description'],
             starting_price=starting_price,
             current_price=starting_price,
-<<<<<<< HEAD
             buy_now_price=Decimal(draft['buy_now_price']) if draft.get('buy_now_price') else None,
             shipping_cost_base=Decimal(draft.get('shipping_cost', '0')),
             free_shipping=free_shipping,
             pickup_available=pickup_available,
-=======
->>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
             end_time=end_time,
             status='active',
             created_via='ussd',
@@ -1309,7 +1278,6 @@ def ussd_wallet_initiate(request):
         if payment.user != request.user:
             return JsonResponse({'error': 'Unauthorized access'}, status=403)
         
-<<<<<<< HEAD
         is_checkout = 'cart_items' in payment.metadata
         
         if is_checkout:
@@ -1323,12 +1291,6 @@ def ussd_wallet_initiate(request):
             shipping_cost = Decimal('0')
             tax_amount = base_amount * TAX_RATE
             total_amount = base_amount + tax_amount
-=======
-        TAX_RATE = Decimal('0.05')
-        base_amount = payment.amount
-        tax_amount = base_amount * TAX_RATE
-        total_amount = base_amount + tax_amount
->>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
         
         session_id = str(uuid.uuid4())
         
@@ -1343,10 +1305,7 @@ def ussd_wallet_initiate(request):
                 'payment_id': str(payment_id),
                 'action': action,
                 'base_amount': str(base_amount),
-<<<<<<< HEAD
                 'shipping_cost': str(shipping_cost) if is_checkout else '0',
-=======
->>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
                 'tax_amount': str(tax_amount),
                 'total_amount': str(total_amount)
             }
@@ -1356,7 +1315,6 @@ def ussd_wallet_initiate(request):
         action_text = 'Deposit' if action == 'deposit' else 'Withdraw'
         
         menu_text = f"{network_name} Mobile Money\n\n"
-<<<<<<< HEAD
         
         if is_checkout:
             menu_text += f"Checkout Payment\n"
@@ -1371,12 +1329,6 @@ def ussd_wallet_initiate(request):
             menu_text += f"Platform Tax (5%): UGX {tax_amount:,.0f}\n"
             menu_text += f"Total: UGX {total_amount:,.0f}\n\n"
         
-=======
-        menu_text += f"Wallet {action_text}\n"
-        menu_text += f"Amount: UGX {base_amount:,.0f}\n"
-        menu_text += f"Platform Tax (5%): UGX {tax_amount:,.0f}\n"
-        menu_text += f"Total: UGX {total_amount:,.0f}\n\n"
->>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
         menu_text += "Enter your PIN to confirm:"
         
         session.last_message = menu_text
@@ -1425,10 +1377,7 @@ def handle_wallet_pin_confirmation(session, pin):
         base_amount = Decimal(str(session.session_data.get('base_amount', 0)))
         tax_amount = Decimal(str(session.session_data.get('tax_amount', 0)))
         total_amount = Decimal(str(session.session_data.get('total_amount', 0)))
-<<<<<<< HEAD
         shipping_cost = Decimal(str(session.session_data.get('shipping_cost', 0)))
-=======
->>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
         
         payment = Payment.objects.get(payment_id=payment_id, user=session.user, status='pending')
         wallet, created = Wallet.objects.get_or_create(user=session.user)
@@ -1436,11 +1385,8 @@ def handle_wallet_pin_confirmation(session, pin):
         network_name = 'MTN' if session.network == 'mtn' else 'Airtel'
         
         if action == 'deposit':
-<<<<<<< HEAD
             is_checkout = 'cart_items' in payment.metadata
             
-=======
->>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
             wallet.deposit(
                 amount=base_amount,
                 description=f'{network_name} Mobile Money deposit - {payment.transaction_reference}',
@@ -1468,7 +1414,6 @@ def handle_wallet_pin_confirmation(session, pin):
                 demo_mode=True
             )
             
-<<<<<<< HEAD
             if is_checkout:
                 from auctions.models import Cart, CartItem
                 from payments.services import settle_payment_to_sellers
@@ -1502,16 +1447,6 @@ def handle_wallet_pin_confirmation(session, pin):
                 message += f"Payment: {network_name} MoMo\n\n"
                 message += f"SMS sent to {session.phone_number}\n\n"
                 message += "Thank you!"
-=======
-            message = f"✅ Deposit Successful!\n\n"
-            message += f"Amount: UGX {base_amount:,.0f}\n"
-            message += f"Tax (5%): UGX {tax_amount:,.0f}\n"
-            message += f"Total Paid: UGX {total_amount:,.0f}\n"
-            message += f"New Balance: UGX {wallet.balance:,.0f}\n"
-            message += f"Payment: {network_name} MoMo\n\n"
-            message += f"SMS sent to {session.phone_number}\n\n"
-            message += "Thank you!"
->>>>>>> 920a300328a2bc3bce919ee8da4940732f9353f7
             
         elif action == 'withdraw':
             if not wallet.can_withdraw(base_amount):
