@@ -1,0 +1,497 @@
+{% extends 'base.html' %}
+
+{% block title %}Sell an Item - Online Auction System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .sell-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+    
+    .form-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .preview-section {
+        background: #f8f9fa;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        position: sticky;
+        top: 20px;
+        height: fit-content;
+    }
+    
+    .preview-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .live-toggle {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .toggle-switch {
+        position: relative;
+        width: 50px;
+        height: 24px;
+    }
+    
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 24px;
+    }
+    
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+    
+    input:checked + .toggle-slider {
+        background-color: var(--primary-color);
+    }
+    
+    input:checked + .toggle-slider:before {
+        transform: translateX(26px);
+    }
+    
+    .preview-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .preview-image {
+        width: 100%;
+        height: 200px;
+        background: #e9ecef;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        object-fit: cover;
+    }
+    
+    .preview-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+    
+    .preview-description {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    
+    .preview-details {
+        border-top: 1px solid #eee;
+        padding-top: 1rem;
+    }
+    
+    .preview-detail-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+    
+    .preview-detail-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .preview-detail-value {
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .btn-go-live {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        color: white;
+        padding: 12px 40px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .btn-go-live:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+    }
+    
+    .btn-cancel {
+        background: #6c757d;
+        border: none;
+        color: white;
+        padding: 12px 40px;
+        font-size: 1.1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .btn-cancel:hover {
+        background: #5a6268;
+    }
+    
+    @media (max-width: 768px) {
+        .sell-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .preview-section {
+            position: relative;
+            top: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4"><i class="fas fa-plus-circle"></i> Sell an Item</h2>
+    
+    <form method="post" enctype="multipart/form-data" id="sell-form">
+        {% csrf_token %}
+        
+        <div class="sell-container">
+            <div class="form-section">
+                <div class="mb-3">
+                    {{ form.title.label_tag }}
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <div class="text-danger">{{ form.title.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    {{ form.description.label_tag }}
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <div class="text-danger">{{ form.description.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    {{ form.category.label_tag }}
+                    {{ form.category }}
+                    {% if form.category.errors %}
+                        <div class="text-danger">{{ form.category.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    {{ form.starting_price.label_tag }}
+                    {{ form.starting_price }}
+                    {% if form.starting_price.errors %}
+                        <div class="text-danger">{{ form.starting_price.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    {{ form.min_increment.label_tag }}
+                    {{ form.min_increment }}
+                    {% if form.min_increment.errors %}
+                        <div class="text-danger">{{ form.min_increment.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    {{ form.buy_now_price.label_tag }}
+                    {{ form.buy_now_price }}
+                    <small class="form-text text-muted">Allow buyers to purchase instantly at this price (optional)</small>
+                    {% if form.buy_now_price.errors %}
+                        <div class="text-danger">{{ form.buy_now_price.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    {{ form.duration_minutes.label_tag }}
+                    {{ form.duration_minutes }}
+                    <small class="form-text text-muted">{{ form.duration_minutes.help_text }}</small>
+                    {% if form.duration_minutes.errors %}
+                        <div class="text-danger">{{ form.duration_minutes.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    {{ form.main_image.label_tag }}
+                    {{ form.main_image }}
+                    <small class="form-text text-muted">Optional. JPG/PNG/WebP, up to 5MB.</small>
+                    {% if form.main_image.errors %}
+                        <div class="text-danger">{{ form.main_image.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div style="border-top: 2px solid #e9ecef; margin: 2rem 0; padding-top: 2rem;">
+                    <h5 class="mb-3" style="color: var(--primary-color);">
+                        <i class="fas fa-shipping-fast"></i> Shipping & Delivery Options
+                    </h5>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.seller_city.label_tag }}
+                            {{ form.seller_city }}
+                            <small class="form-text text-muted">{{ form.seller_city.help_text }}</small>
+                            {% if form.seller_city.errors %}
+                                <div class="text-danger">{{ form.seller_city.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.seller_area.label_tag }}
+                            {{ form.seller_area }}
+                            <small class="form-text text-muted">{{ form.seller_area.help_text }}</small>
+                            {% if form.seller_area.errors %}
+                                <div class="text-danger">{{ form.seller_area.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.shipping_cost_base.label_tag }}
+                        {{ form.shipping_cost_base }}
+                        <small class="form-text text-muted">Base shipping cost within your city (if not free)</small>
+                        {% if form.shipping_cost_base.errors %}
+                            <div class="text-danger">{{ form.shipping_cost_base.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.free_shipping }}
+                            <label class="form-check-label" for="free-shipping">
+                                <strong>{{ form.free_shipping.label }}</strong>
+                                <span class="badge bg-success ms-2">Popular</span>
+                            </label>
+                            <small class="form-text text-muted d-block mt-1">
+                                Offer free shipping to attract more buyers (shipping cost set to UGX 0)
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.pickup_available }}
+                            <label class="form-check-label" for="pickup-available">
+                                <strong>{{ form.pickup_available.label }}</strong>
+                            </label>
+                            <small class="form-text text-muted d-block mt-1">
+                                Let buyers pick up item from your location instead of delivery
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn-go-live">
+                        <i class="fas fa-rocket"></i> Go live
+                    </button>
+                    <a href="{% url 'home' %}" class="btn-cancel">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </div>
+            
+            <div class="preview-section">
+                <div class="preview-header">
+                    <h4>Preview</h4>
+                    <div class="live-toggle">
+                        <span>Live</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="live-toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="preview-card">
+                    <div class="preview-image" id="preview-image">
+                        <i class="fas fa-image fa-3x text-muted"></i>
+                    </div>
+                    
+                    <div class="preview-title" id="preview-title">
+                        Item Title
+                    </div>
+                    
+                    <div class="preview-description" id="preview-description">
+                        Item description will appear here...
+                    </div>
+                    
+                    <div class="preview-details">
+                        <div class="preview-detail-item">
+                            <span class="preview-detail-label">Starting price</span>
+                            <span class="preview-detail-value" id="preview-price">UGX 0</span>
+                        </div>
+                        <div class="preview-detail-item">
+                            <span class="preview-detail-label">Min increment</span>
+                            <span class="preview-detail-value" id="preview-increment">UGX 0</span>
+                        </div>
+                        <div class="preview-detail-item" id="preview-buy-now-section" style="display: none;">
+                            <span class="preview-detail-label">Buy Now price</span>
+                            <span class="preview-detail-value" id="preview-buy-now" style="color: #10b981;">UGX 0</span>
+                        </div>
+                        <div class="preview-detail-item">
+                            <span class="preview-detail-label">Duration</span>
+                            <span class="preview-detail-value" id="preview-duration">0 minutes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const titleInput = document.getElementById('item-title');
+    const descInput = document.getElementById('item-description');
+    const priceInput = document.getElementById('item-price');
+    const incrementInput = document.getElementById('item-increment');
+    const buyNowInput = document.getElementById('buy-now-price');
+    const durationInput = document.getElementById('id_duration_minutes');
+    const imageInput = document.getElementById('item-image');
+    
+    const previewTitle = document.getElementById('preview-title');
+    const previewDesc = document.getElementById('preview-description');
+    const previewPrice = document.getElementById('preview-price');
+    const previewIncrement = document.getElementById('preview-increment');
+    const previewBuyNow = document.getElementById('preview-buy-now');
+    const previewBuyNowSection = document.getElementById('preview-buy-now-section');
+    const previewDuration = document.getElementById('preview-duration');
+    const previewImage = document.getElementById('preview-image');
+    
+    function formatCurrency(value) {
+        if (!value) return 'UGX 0';
+        return 'UGX ' + parseFloat(value).toLocaleString();
+    }
+    
+    titleInput.addEventListener('input', function() {
+        previewTitle.textContent = this.value || 'Item Title';
+    });
+    
+    descInput.addEventListener('input', function() {
+        previewDesc.textContent = this.value || 'Item description will appear here...';
+    });
+    
+    priceInput.addEventListener('input', function() {
+        previewPrice.textContent = formatCurrency(this.value);
+    });
+    
+    incrementInput.addEventListener('input', function() {
+        previewIncrement.textContent = formatCurrency(this.value);
+    });
+    
+    buyNowInput.addEventListener('input', function() {
+        if (this.value && parseFloat(this.value) > 0) {
+            previewBuyNow.textContent = formatCurrency(this.value);
+            previewBuyNowSection.style.display = 'flex';
+        } else {
+            previewBuyNowSection.style.display = 'none';
+        }
+    });
+    
+    durationInput.addEventListener('input', function() {
+        previewDuration.textContent = (this.value || '0') + ' minutes';
+    });
+    
+    imageInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.innerHTML = '<img src="' + e.target.result + '" class="preview-image" style="object-fit: cover;">';
+            };
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+    
+    const form = document.getElementById('sell-form');
+    form.addEventListener('submit', function(e) {
+        const liveToggle = document.getElementById('live-toggle');
+        if (!liveToggle.checked) {
+            e.preventDefault();
+            alert('Please enable "Live" toggle to publish your item.');
+            return false;
+        }
+    });
+    
+    const citySelect = document.getElementById('seller-city');
+    const areaSelect = document.getElementById('seller-area');
+    
+    if (citySelect && areaSelect) {
+        citySelect.addEventListener('change', function() {
+            const selectedCity = this.value;
+            if (!selectedCity) {
+                areaSelect.innerHTML = '<option value="">Select City First</option>';
+                areaSelect.disabled = true;
+                return;
+            }
+            
+            areaSelect.disabled = false;
+            const form = this.closest('form');
+            
+            fetch(`/get-areas/${selectedCity}/`)
+                .then(response => response.json())
+                .then(data => {
+                    areaSelect.innerHTML = '<option value="">Select Area</option>';
+                    data.areas.forEach(area => {
+                        const option = document.createElement('option');
+                        option.value = area;
+                        option.textContent = area;
+                        areaSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading areas:', error);
+                    areaSelect.innerHTML = '<option value="">Error loading areas</option>';
+                });
+        });
+    }
+});
+</script>
+{% endblock %}

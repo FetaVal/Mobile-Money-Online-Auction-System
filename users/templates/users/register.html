@@ -1,0 +1,504 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Register - AuctionHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        min-height: 100vh;
+    }
+    
+    .register-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    
+    .register-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        overflow: hidden;
+        max-width: 500px;
+        width: 100%;
+        animation: slideUp 0.5s ease-out;
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .register-header {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        padding: 40px 30px;
+        text-align: center;
+        color: white;
+    }
+    
+    .register-header h1 {
+        font-size: 32px;
+        font-weight: 700;
+        margin: 0 0 10px 0;
+    }
+    
+    .register-header p {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 16px;
+    }
+    
+    .register-body {
+        padding: 40px 30px;
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+    
+    .password-wrapper {
+        position: relative;
+    }
+    
+    .password-toggle {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #64748b;
+        font-size: 18px;
+        transition: all 0.3s;
+    }
+    
+    .password-toggle:hover {
+        color: #10b981;
+    }
+    
+    .form-control {
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px 15px;
+        font-size: 15px;
+        transition: all 0.3s;
+    }
+    
+    .form-control:focus {
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    }
+    
+    .password-strength {
+        margin-top: 10px;
+        font-size: 13px;
+    }
+    
+    .strength-bar {
+        height: 4px;
+        background: #e2e8f0;
+        border-radius: 2px;
+        overflow: hidden;
+        margin-top: 5px;
+    }
+    
+    .strength-progress {
+        height: 100%;
+        width: 0%;
+        transition: all 0.3s;
+    }
+    
+    .strength-weak { background: #ef4444; width: 33%; }
+    .strength-medium { background: #f59e0b; width: 66%; }
+    .strength-strong { background: #10b981; width: 100%; }
+    
+    .slider-captcha {
+        margin: 25px 0;
+        padding: 20px;
+        background: #f8fafc;
+        border-radius: 10px;
+        border: 2px solid #e2e8f0;
+    }
+    
+    .slider-track {
+        position: relative;
+        height: 60px;
+        background: linear-gradient(90deg, #e2e8f0 0%, #cbd5e1 100%);
+        border-radius: 30px;
+        overflow: hidden;
+    }
+    
+    .slider-progress {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+        width: 0%;
+        transition: width 0.1s;
+    }
+    
+    .slider-handle {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 60px;
+        height: 60px;
+        background: white;
+        border-radius: 50%;
+        cursor: grab;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: all 0.3s;
+        user-select: none;
+    }
+    
+    .slider-handle:active {
+        cursor: grabbing;
+        transform: translateY(-50%) scale(1.1);
+    }
+    
+    .slider-handle.verified {
+        background: #10b981;
+        color: white;
+    }
+    
+    .slider-text {
+        position: absolute;
+        width: 100%;
+        text-align: center;
+        top: 50%;
+        transform: translateY(-50%);
+        font-weight: 600;
+        color: #64748b;
+        pointer-events: none;
+        font-size: 14px;
+    }
+    
+    .slider-text.verified {
+        color: white;
+    }
+    
+    .btn-register {
+        width: 100%;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border: none;
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+    
+    .btn-register:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .divider {
+        text-align: center;
+        margin: 30px 0;
+        position: relative;
+    }
+    
+    .divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #e2e8f0;
+    }
+    
+    .divider span {
+        background: white;
+        padding: 0 15px;
+        position: relative;
+        color: #64748b;
+        font-size: 14px;
+    }
+    
+    .login-link {
+        text-align: center;
+        padding: 20px 0 0 0;
+    }
+    
+    .login-link a {
+        color: #10b981;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    
+    .login-link a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <div class="register-card">
+        <div class="register-header">
+            <h1>🎉 Join AuctionHub!</h1>
+            <p>Create your account and start bidding</p>
+        </div>
+        
+        <div class="register-body">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <form method="post" id="registerForm">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-user"></i> Username
+                    </label>
+                    <input type="text" name="username" class="form-control" placeholder="Choose a unique username" required autofocus>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-envelope"></i> Email Address
+                    </label>
+                    <input type="email" name="email" class="form-control" placeholder="your@email.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-lock"></i> Password
+                    </label>
+                    <div class="password-wrapper">
+                        <input type="password" name="password1" id="password1" class="form-control" placeholder="Create a strong password" required>
+                        <i class="fas fa-eye password-toggle" id="togglePassword1" onclick="togglePasswordVisibility('password1', 'togglePassword1')"></i>
+                    </div>
+                    <div class="password-strength">
+                        <div class="strength-bar">
+                            <div class="strength-progress" id="strengthProgress"></div>
+                        </div>
+                        <small id="strengthText" class="text-muted">Password strength: <span id="strengthLabel">-</span></small>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-check-circle"></i> Confirm Password
+                    </label>
+                    <div class="password-wrapper">
+                        <input type="password" name="password2" id="password2" class="form-control" placeholder="Confirm your password" required>
+                        <i class="fas fa-eye password-toggle" id="togglePassword2" onclick="togglePasswordVisibility('password2', 'togglePassword2')"></i>
+                    </div>
+                </div>
+                
+                <div class="slider-captcha">
+                    <div class="slider-track" id="sliderTrack">
+                        <div class="slider-progress" id="sliderProgress"></div>
+                        <div class="slider-text" id="sliderText">Slide to verify you're human 👉</div>
+                        <div class="slider-handle" id="sliderHandle">
+                            🤝
+                        </div>
+                    </div>
+                </div>
+                
+                <input type="hidden" name="captcha_token" id="captchaToken" value="">
+                
+                <button type="submit" class="btn-register" id="submitBtn" disabled>
+                    <i class="fas fa-user-plus"></i> Create My Account
+                </button>
+            </form>
+            
+            <div class="divider">
+                <span>Already have an account?</span>
+            </div>
+            
+            <div class="login-link">
+                <a href="{% url 'login' %}">
+                    <i class="fas fa-sign-in-alt"></i> Login to your account
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const CAPTCHA_CHALLENGE = "{{ captcha_challenge|default:'' }}";
+
+async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Password Toggle
+function togglePasswordVisibility(inputId, iconId) {
+    const passwordInput = document.getElementById(inputId);
+    const toggleIcon = document.getElementById(iconId);
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.classList.remove('fa-eye');
+        toggleIcon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        toggleIcon.classList.remove('fa-eye-slash');
+        toggleIcon.classList.add('fa-eye');
+    }
+}
+
+// Password Strength Checker
+document.getElementById('password1').addEventListener('input', function(e) {
+    const password = e.target.value;
+    const strengthProgress = document.getElementById('strengthProgress');
+    const strengthLabel = document.getElementById('strengthLabel');
+    
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+    if (password.match(/[0-9]/)) strength++;
+    if (password.match(/[^a-zA-Z0-9]/)) strength++;
+    
+    strengthProgress.className = 'strength-progress';
+    
+    if (strength <= 1) {
+        strengthProgress.classList.add('strength-weak');
+        strengthLabel.textContent = 'Weak';
+        strengthLabel.style.color = '#ef4444';
+    } else if (strength <= 3) {
+        strengthProgress.classList.add('strength-medium');
+        strengthLabel.textContent = 'Medium';
+        strengthLabel.style.color = '#f59e0b';
+    } else {
+        strengthProgress.classList.add('strength-strong');
+        strengthLabel.textContent = 'Strong';
+        strengthLabel.style.color = '#10b981';
+    }
+});
+
+// Slider Captcha
+let isDragging = false;
+let startX = 0;
+let currentX = 0;
+let verified = false;
+
+const handle = document.getElementById('sliderHandle');
+const track = document.getElementById('sliderTrack');
+const progress = document.getElementById('sliderProgress');
+const sliderText = document.getElementById('sliderText');
+const submitBtn = document.getElementById('submitBtn');
+const captchaInput = document.getElementById('captchaToken');
+
+handle.addEventListener('mousedown', startDrag);
+handle.addEventListener('touchstart', startDrag);
+
+document.addEventListener('mousemove', drag);
+document.addEventListener('touchmove', drag);
+
+document.addEventListener('mouseup', stopDrag);
+document.addEventListener('touchend', stopDrag);
+
+function startDrag(e) {
+    if (verified) return;
+    isDragging = true;
+    startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+}
+
+function drag(e) {
+    if (!isDragging || verified) return;
+    e.preventDefault();
+    
+    const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+    const trackRect = track.getBoundingClientRect();
+    const maxMove = trackRect.width - 60;
+    
+    let moveX = clientX - trackRect.left - 30;
+    moveX = Math.max(0, Math.min(moveX, maxMove));
+    
+    handle.style.left = moveX + 'px';
+    progress.style.width = (moveX / maxMove * 100) + '%';
+    
+    if (moveX >= maxMove * 0.95) {
+        verifySuccess();
+    }
+}
+
+function stopDrag() {
+    if (!verified && isDragging) {
+        handle.style.left = '0px';
+        progress.style.width = '0%';
+    }
+    isDragging = false;
+}
+
+async function verifySuccess() {
+    verified = true;
+    isDragging = false;
+    
+    handle.classList.add('verified');
+    sliderText.classList.add('verified');
+    sliderText.textContent = '✓ Verified! You\'re all set';
+    progress.style.width = '100%';
+    
+    const token = await sha256(CAPTCHA_CHALLENGE + ':completed');
+    captchaInput.value = token;
+    submitBtn.disabled = false;
+    
+    handle.style.cursor = 'default';
+}
+
+// Form validation
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    if (!verified) {
+        e.preventDefault();
+        alert('Please complete the verification slider');
+        return false;
+    }
+    
+    const password1 = document.getElementById('password1').value;
+    const password2 = document.getElementById('password2').value;
+    
+    if (password1 !== password2) {
+        e.preventDefault();
+        alert('Passwords do not match!');
+        return false;
+    }
+});
+</script>
+{% endblock %}

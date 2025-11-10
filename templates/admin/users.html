@@ -1,0 +1,258 @@
+{% extends 'admin/base.html' %}
+
+{% block admin_content %}
+<div class="admin-header">
+    <h1>👥 User Management</h1>
+    <p>View and manage registered users</p>
+</div>
+
+<!-- Search and Filter -->
+<div class="search-filter-bar">
+    <form method="get" class="row align-items-center" action="{% url 'admin_users' %}">
+        <div class="col-md-10">
+            <input type="text" name="q" class="form-control" placeholder="Search by username, email, or phone..." value="{{ search_query }}">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Users Table -->
+<div class="content-card">
+    <h5><i class="fas fa-users"></i> All Users ({{ total_count }})</h5>
+    <div class="table-responsive">
+        <table class="data-table" style="table-layout: auto; width: 100%;">
+            <thead>
+                <tr>
+                    <th style="width: 12%;">User</th>
+                    <th style="width: 18%;">Email</th>
+                    <th style="width: 12%;">Phone</th>
+                    <th style="width: 12%;">Joined</th>
+                    <th style="width: 10%;">Status</th>
+                    <th style="width: 15%;">Bypass Permissions</th>
+                    <th style="width: 21%;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>
+                        <a href="{% url 'seller_profile' user.username %}" style="text-decoration: none; color: #3b82f6; font-weight: 600;">
+                            {{ user.username }}
+                        </a>
+                        {% if user.is_superuser %}
+                            <span class="badge badge-danger">Admin</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ user.email|default:"N/A" }}</td>
+                    <td>{{ user.profile.phone_number|default:"N/A" }}</td>
+                    <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                    <td>
+                        {% if user.is_active %}
+                            <span class="badge badge-success">Active</span>
+                        {% else %}
+                            <span class="badge badge-secondary">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td style="white-space: nowrap;">
+                        {% if user.is_superuser %}
+                            <span class="badge badge-danger" style="font-size: 0.85rem; padding: 4px 8px;" title="Admin: Auto-exempt from all restrictions">
+                                <i class="fas fa-crown"></i> Exempt
+                            </span>
+                        {% else %}
+                            <button onclick="showBypassModal({{ user.id }}, '{{ user.username }}', {{ user.profile.bypass_account_age_check|lower }}, {{ user.profile.bypass_rapid_bidding_check|lower }}, {{ user.profile.bypass_fraud_detection|lower }}, {{ user.profile.bypass_all_restrictions|lower }})" 
+                                    class="btn btn-sm btn-outline-secondary" title="Manage bypass permissions">
+                                <i class="fas fa-shield-alt"></i> 
+                                {% if user.profile.bypass_all_restrictions %}
+                                    <span class="badge badge-warning">All</span>
+                                {% elif user.profile.bypass_account_age_check or user.profile.bypass_rapid_bidding_check or user.profile.bypass_fraud_detection %}
+                                    <span class="badge badge-info">{{ user.profile.bypass_account_age_check|add:user.profile.bypass_rapid_bidding_check|add:user.profile.bypass_fraud_detection }}</span>
+                                {% else %}
+                                    Manage
+                                {% endif %}
+                            </button>
+                        {% endif %}
+                    </td>
+                    <td style="white-space: nowrap;">
+                        <a href="{% url 'seller_profile' user.username %}" class="btn btn-sm btn-outline-primary mr-1">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                        {% if not user.is_superuser %}
+                            <button onclick="toggleUserStatus({{ user.id }}, '{{ user.username }}')" class="btn btn-sm {% if user.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}" id="user-btn-{{ user.id }}">
+                                <i class="fas fa-{% if user.is_active %}ban{% else %}check{% endif %}"></i> {% if user.is_active %}Deactivate{% else %}Activate{% endif %}
+                            </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px; color: #94a3b8;">
+                        <i class="fas fa-users fa-3x mb-3" style="display: block;"></i>
+                        No users found
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Bypass Permissions Modal -->
+<div class="modal fade" id="bypassModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-shield-alt"></i> Bypass Permissions: <span id="modal-username"></span></h5>
+                <button type="button" class="close" onclick="closeBypassModal()">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted">Grant bypass permissions to trusted users. <strong>Use with caution!</strong></p>
+                <form id="bypassForm">
+                    <input type="hidden" id="bypass-user-id" name="user_id">
+                    
+                    <div class="custom-control custom-checkbox mb-3">
+                        <input type="checkbox" class="custom-control-input" id="bypass_all" name="bypass_all">
+                        <label class="custom-control-label" for="bypass_all">
+                            <strong>🔥 Bypass ALL Restrictions</strong>
+                            <br><small class="text-muted">Disable all security checks (extreme caution!)</small>
+                        </label>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="custom-control custom-checkbox mb-3">
+                        <input type="checkbox" class="custom-control-input" id="bypass_age" name="bypass_age">
+                        <label class="custom-control-label" for="bypass_age">
+                            <strong>🕐 Bypass Account Age Check</strong>
+                            <br><small class="text-muted">Allow high-value bids regardless of account age</small>
+                        </label>
+                    </div>
+                    
+                    <div class="custom-control custom-checkbox mb-3">
+                        <input type="checkbox" class="custom-control-input" id="bypass_rapid" name="bypass_rapid">
+                        <label class="custom-control-label" for="bypass_rapid">
+                            <strong>⚡ Bypass Rapid Bidding Check</strong>
+                            <br><small class="text-muted">No CAPTCHA challenges or cooldowns</small>
+                        </label>
+                    </div>
+                    
+                    <div class="custom-control custom-checkbox mb-3">
+                        <input type="checkbox" class="custom-control-input" id="bypass_fraud" name="bypass_fraud">
+                        <label class="custom-control-label" for="bypass_fraud">
+                            <strong>🛡️ Bypass Fraud Detection</strong>
+                            <br><small class="text-muted">Fraud alerts logged but won't block bids</small>
+                        </label>
+                    </div>
+                    
+                    <div class="form-group mt-4">
+                        <label for="bypass_notes"><strong>Admin Notes:</strong></label>
+                        <textarea class="form-control" id="bypass_notes" name="bypass_notes" rows="2" placeholder="Why is this bypass being granted?"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeBypassModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveBypassPermissions()">
+                    <i class="fas fa-save"></i> Save Permissions
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleUserStatus(userId, username) {
+    if (!confirm(`Are you sure you want to change the status of user "${username}"?`)) {
+        return;
+    }
+    
+    const btn = document.getElementById(`user-btn-${userId}`);
+    const originalHtml = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    btn.disabled = true;
+    
+    fetch(`/dashboard/users/${userId}/toggle-status/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+        }
+    })
+    .catch(error => {
+        alert('Failed to update user status');
+        btn.innerHTML = originalHtml;
+        btn.disabled = false;
+    });
+}
+
+function showBypassModal(userId, username, bypassAge, bypassRapid, bypassFraud, bypassAll) {
+    document.getElementById('bypass-user-id').value = userId;
+    document.getElementById('modal-username').textContent = username;
+    document.getElementById('bypass_age').checked = bypassAge;
+    document.getElementById('bypass_rapid').checked = bypassRapid;
+    document.getElementById('bypass_fraud').checked = bypassFraud;
+    document.getElementById('bypass_all').checked = bypassAll;
+    document.getElementById('bypass_notes').value = '';
+    
+    // Use vanilla JS Bootstrap modal
+    var modal = new bootstrap.Modal(document.getElementById('bypassModal'));
+    modal.show();
+}
+
+function closeBypassModal() {
+    var modal = bootstrap.Modal.getInstance(document.getElementById('bypassModal'));
+    if (modal) {
+        modal.hide();
+    }
+}
+
+function saveBypassPermissions() {
+    const userId = document.getElementById('bypass-user-id').value;
+    const formData = {
+        bypass_all: document.getElementById('bypass_all').checked,
+        bypass_age: document.getElementById('bypass_age').checked,
+        bypass_rapid: document.getElementById('bypass_rapid').checked,
+        bypass_fraud: document.getElementById('bypass_fraud').checked,
+        bypass_notes: document.getElementById('bypass_notes').value
+    };
+    
+    fetch(`/dashboard/users/${userId}/update-bypass/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Hide modal using vanilla JS
+            var modal = bootstrap.Modal.getInstance(document.getElementById('bypassModal'));
+            modal.hide();
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Failed to update bypass permissions');
+    });
+}
+</script>
+{% endblock %}

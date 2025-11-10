@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+
+{% block title %}Withdraw Funds - AuctionHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .withdraw-container {
+        max-width: 800px;
+        margin: 2rem auto;
+    }
+    
+    .withdraw-header {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .withdraw-section {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .balance-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .balance-amount {
+        font-size: 3rem;
+        font-weight: 700;
+        margin: 1rem 0;
+    }
+    
+    .payment-method {
+        padding: 1.5rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .payment-method:hover {
+        border-color: #f59e0b;
+        background: #fffbeb;
+    }
+    
+    .payment-method.selected {
+        border-color: #f59e0b;
+        background: #fef3c7;
+    }
+    
+    .payment-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+    
+    .withdraw-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        border: none;
+        padding: 1rem;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .withdraw-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(245, 158, 11, 0.3);
+    }
+    
+    .withdraw-btn:disabled {
+        background: #94a3b8;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .warning-box {
+        background: #fef3c7;
+        border-left: 4px solid #f59e0b;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+    
+    .quick-amounts {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .quick-amount-btn {
+        padding: 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 600;
+        color: #334155;
+    }
+    
+    .quick-amount-btn:hover {
+        border-color: #f59e0b;
+        background: #fffbeb;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container withdraw-container">
+    <div class="withdraw-header">
+        <h1><i class="fas fa-arrow-circle-down"></i> Withdraw Funds</h1>
+        <p style="opacity: 0.9; margin-top: 1rem;">Cash out your wallet balance to mobile money</p>
+    </div>
+    
+    <div class="balance-card">
+        <div style="font-size: 1.2rem; opacity: 0.9;">Available Balance</div>
+        <div class="balance-amount">UGX {{ wallet.balance|floatformat:0 }}</div>
+        <div style="opacity: 0.8;">
+            {% if wallet.is_locked %}
+                <i class="fas fa-lock"></i> Wallet Locked
+            {% else %}
+                <i class="fas fa-check-circle"></i> Ready for Withdrawal
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if wallet.balance > 0 and not wallet.is_locked %}
+        <div class="withdraw-section">
+            <form method="post" action="{% url 'process_withdrawal' %}">
+                {% csrf_token %}
+                
+                <div class="warning-box">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Important:</strong> Withdrawals are processed to mobile money only. 
+                    Processing time: 1-5 minutes. Minimum withdrawal: UGX 1,000.
+                </div>
+                
+                <div class="form-group">
+                    <label for="amount" style="font-weight: 600; color: #334155; font-size: 1.1rem;">
+                        <i class="fas fa-money-bill-wave"></i> Withdrawal Amount (UGX)
+                    </label>
+                    <input type="number" 
+                           class="form-control form-control-lg" 
+                           id="amount" 
+                           name="amount" 
+                           placeholder="Enter amount to withdraw" 
+                           required 
+                           min="1000" 
+                           max="{{ wallet.balance }}"
+                           step="100"
+                           style="border: 2px solid #e2e8f0; border-radius: 10px; padding: 1rem; font-size: 1.2rem;">
+                    <small class="text-muted">
+                        Maximum: UGX {{ wallet.balance|floatformat:0 }} • Minimum: UGX 1,000
+                    </small>
+                    
+                    <div class="quick-amounts">
+                        <button type="button" class="quick-amount-btn" onclick="setAmount(10000)">
+                            10,000
+                        </button>
+                        <button type="button" class="quick-amount-btn" onclick="setAmount(50000)">
+                            50,000
+                        </button>
+                        <button type="button" class="quick-amount-btn" onclick="setAmount(100000)">
+                            100,000
+                        </button>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 2rem;">
+                    <label style="font-weight: 600; color: #334155; font-size: 1.1rem; margin-bottom: 1rem;">
+                        <i class="fas fa-mobile-alt"></i> Select Mobile Money Provider
+                    </label>
+                    
+                    <div class="payment-method" onclick="selectPayment('mtn')">
+                        <input type="radio" name="payment_method" value="mtn" id="mtn-payment" required>
+                        <div class="payment-icon" style="background: #ffcc00;">
+                            📱
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; font-size: 1.1rem; color: #334155;">
+                                MTN Mobile Money
+                            </div>
+                            <div style="color: #64748b;">
+                                Withdraw to MTN Mobile Money
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-method" onclick="selectPayment('airtel')">
+                        <input type="radio" name="payment_method" value="airtel" id="airtel-payment">
+                        <div class="payment-icon" style="background: #ff0000;">
+                            📲
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; font-size: 1.1rem; color: #334155;">
+                                Airtel Money
+                            </div>
+                            <div style="color: #64748b;">
+                                Withdraw to Airtel Money
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin-top: 2rem;">
+                    <label for="phone_number" style="font-weight: 600; color: #334155; font-size: 1.1rem;">
+                        <i class="fas fa-phone"></i> Mobile Money Number
+                    </label>
+                    <input type="tel" 
+                           class="form-control form-control-lg" 
+                           id="phone_number" 
+                           name="phone_number" 
+                           placeholder="e.g., 0700000000"
+                           required
+                           style="border: 2px solid #e2e8f0; border-radius: 10px; padding: 1rem; font-size: 1.2rem;">
+                    <small class="text-muted">
+                        Enter the mobile money number where you want to receive funds
+                    </small>
+                </div>
+                
+                <button type="submit" class="withdraw-btn" style="margin-top: 2rem;">
+                    <i class="fas fa-shield-alt"></i> Withdraw Funds
+                </button>
+            </form>
+        </div>
+    {% else %}
+        <div class="withdraw-section" style="text-align: center; padding: 4rem 2rem;">
+            {% if wallet.is_locked %}
+                <i class="fas fa-lock" style="font-size: 4rem; color: #dc2626; margin-bottom: 1rem;"></i>
+                <h3 style="color: #334155;">Wallet is Locked</h3>
+                <p style="color: #64748b;">Your wallet has been locked. Please contact support.</p>
+            {% else %}
+                <i class="fas fa-wallet" style="font-size: 4rem; color: #94a3b8; margin-bottom: 1rem;"></i>
+                <h3 style="color: #334155;">Insufficient Balance</h3>
+                <p style="color: #64748b;">You need at least UGX 1,000 to make a withdrawal.</p>
+                <a href="{% url 'wallet_deposit' %}" class="btn btn-primary" style="margin-top: 1rem;">
+                    <i class="fas fa-plus-circle"></i> Deposit Funds
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+    
+    <div style="text-align: center; color: #64748b; margin-top: 2rem;">
+        <i class="fas fa-shield-alt"></i> Secure withdrawal processing • Instant confirmation
+    </div>
+</div>
+
+<script>
+function selectPayment(method) {
+    document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+    event.currentTarget.classList.add('selected');
+    document.getElementById(method + '-payment').checked = true;
+}
+
+function setAmount(amount) {
+    const maxAmount = {{ wallet.balance }};
+    if (amount <= maxAmount) {
+        document.getElementById('amount').value = amount;
+    } else {
+        document.getElementById('amount').value = maxAmount;
+    }
+}
+</script>
+{% endblock %}

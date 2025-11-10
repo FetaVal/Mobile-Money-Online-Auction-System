@@ -1,0 +1,963 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Chat with {{ other_user.username }} - Auction Hub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-page {
+        background-color: #f5f5f5;
+        min-height: 100vh;
+        padding: 20px 0;
+    }
+    
+    .chat-card {
+        max-width: 900px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .chat-header {
+        background: #6366f1;
+        color: white;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .chat-header h5 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+    }
+    
+    .safety-warning {
+        background: #ff8c00;
+        color: white;
+        padding: 15px 20px;
+        margin: 0;
+        border-left: 4px solid #ff6600;
+    }
+    
+    .safety-warning-icon {
+        font-size: 20px;
+        margin-right: 10px;
+    }
+    
+    .safety-warning h6 {
+        margin: 0 0 8px 0;
+        font-weight: bold;
+        font-size: 16px;
+    }
+    
+    .safety-warning ul {
+        margin: 0;
+        padding-left: 20px;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+    
+    .safety-warning ul li {
+        margin-bottom: 5px;
+    }
+    
+    .chat-beginning {
+        text-align: center;
+        padding: 20px;
+        color: #94a3b8;
+        font-size: 14px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .messages-container {
+        height: 500px;
+        overflow-y: auto;
+        padding: 20px;
+        background: #f8f9fa;
+    }
+    
+    .message-date {
+        text-align: center;
+        margin: 20px 0;
+    }
+    
+    .message-date span {
+        background: #e2e8f0;
+        padding: 5px 15px;
+        border-radius: 15px;
+        font-size: 12px;
+        color: #64748b;
+    }
+    
+    .message {
+        margin-bottom: 15px;
+        display: flex;
+        animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .message.sent {
+        justify-content: flex-end;
+    }
+    
+    .message.received {
+        justify-content: flex-start;
+    }
+    
+    .message-bubble {
+        max-width: 70%;
+        padding: 10px 14px;
+        border-radius: 12px;
+        position: relative;
+    }
+    
+    .message.sent .message-bubble {
+        background: #dcf8c6;
+        border-bottom-right-radius: 2px;
+    }
+    
+    .message.received .message-bubble {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-bottom-left-radius: 2px;
+    }
+    
+    .message-sender {
+        font-size: 12px;
+        color: #6366f1;
+        font-weight: 600;
+        margin-bottom: 3px;
+    }
+    
+    .message-content {
+        font-size: 14px;
+        line-height: 1.4;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+        color: #111827;
+    }
+    
+    .message-image {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 12px;
+        margin-top: 8px;
+        cursor: pointer;
+        display: block;
+    }
+    
+    .message-time {
+        font-size: 11px;
+        color: #64748b;
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .message.sent .message-time {
+        justify-content: flex-end;
+    }
+    
+    .send-container {
+        background: white;
+        padding: 20px;
+        border-top: 1px solid #e2e8f0;
+    }
+    
+    .input-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #f8f9fa;
+        border: 2px solid #e2e8f0;
+        border-radius: 25px;
+        padding: 8px 15px;
+        transition: all 0.3s;
+    }
+    
+    .input-wrapper:focus-within {
+        border-color: #6366f1;
+        background: white;
+    }
+    
+    .attach-btn {
+        background: none;
+        border: none;
+        color: #64748b;
+        cursor: pointer;
+        padding: 8px;
+        transition: all 0.3s;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .attach-btn:hover {
+        color: #6366f1;
+        transform: scale(1.1);
+    }
+    
+    .message-input {
+        flex: 1;
+        border: none;
+        background: none;
+        outline: none;
+        resize: none;
+        font-size: 15px;
+        line-height: 1.5;
+        max-height: 120px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        padding: 8px 0;
+    }
+    
+    .send-btn {
+        background: #6366f1;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        flex-shrink: 0;
+    }
+    
+    .send-btn:hover:not(:disabled) {
+        background: #4f46e5;
+        transform: scale(1.05);
+    }
+    
+    .send-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .image-preview-container {
+        margin-bottom: 10px;
+    }
+    
+    .image-preview {
+        position: relative;
+        display: inline-block;
+        margin-right: 10px;
+    }
+    
+    .image-preview img {
+        max-height: 100px;
+        border-radius: 8px;
+        border: 2px solid #e2e8f0;
+    }
+    
+    .remove-preview {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #ef4444;
+        color: white;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: bold;
+        border: 2px solid white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .remove-preview:hover {
+        background: #dc2626;
+    }
+    
+    /* Sidebar styles */
+    .chat-wrapper {
+        display: flex;
+        position: relative;
+    }
+    
+    .chat-main {
+        flex: 1;
+        transition: all 0.3s ease;
+    }
+    
+    .sidebar-toggle-btn {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        font-size: 20px;
+        padding: 5px 10px;
+        transition: all 0.3s;
+    }
+    
+    .sidebar-toggle-btn:hover {
+        background: rgba(255,255,255,0.1);
+        border-radius: 4px;
+    }
+    
+    .menu-toggle-btn {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        font-size: 20px;
+        padding: 5px 10px;
+        position: relative;
+    }
+    
+    .menu-toggle-btn:hover {
+        background: rgba(255,255,255,0.1);
+        border-radius: 4px;
+    }
+    
+    .header-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .dropdown-menu-custom {
+        position: absolute;
+        right: 10px;
+        top: 60px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1000;
+        min-width: 180px;
+        display: none;
+    }
+    
+    .dropdown-menu-custom.show {
+        display: block;
+    }
+    
+    .dropdown-menu-custom a {
+        display: block;
+        padding: 12px 16px;
+        color: #334155;
+        text-decoration: none;
+        transition: all 0.2s;
+        font-size: 14px;
+    }
+    
+    .dropdown-menu-custom a:hover {
+        background: #f1f5f9;
+    }
+    
+    .dropdown-menu-custom a:first-child {
+        border-radius: 8px 8px 0 0;
+    }
+    
+    .dropdown-menu-custom a:last-child {
+        border-radius: 0 0 8px 8px;
+    }
+    
+    .dropdown-menu-custom a i {
+        width: 20px;
+        margin-right: 8px;
+    }
+    
+    .order-sidebar {
+        width: 0;
+        overflow: hidden;
+        background: white;
+        border-left: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+    
+    .order-sidebar.open {
+        width: 320px;
+    }
+    
+    .sidebar-content {
+        width: 320px;
+        padding: 20px;
+        overflow-y: auto;
+        height: 100%;
+    }
+    
+    .sidebar-header {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    
+    .sidebar-header h6 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    
+    .sidebar-stats {
+        display: flex;
+        gap: 15px;
+        margin-top: 10px;
+    }
+    
+    .stat-item {
+        flex: 1;
+        background: #f8fafc;
+        padding: 10px;
+        border-radius: 6px;
+        text-align: center;
+    }
+    
+    .stat-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: #6366f1;
+    }
+    
+    .stat-label {
+        font-size: 11px;
+        color: #64748b;
+        margin-top: 2px;
+    }
+    
+    .order-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .order-tab {
+        flex: 1;
+        padding: 8px;
+        background: #f1f5f9;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+        color: #64748b;
+        transition: all 0.2s;
+    }
+    
+    .order-tab.active {
+        background: #6366f1;
+        color: white;
+    }
+    
+    .order-list {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    
+    .order-item {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .order-item:hover {
+        transform: translateX(-2px);
+        box-shadow: 0 2px 8px rgba(99,102,241,0.1);
+        border-color: #6366f1;
+    }
+    
+    .order-image {
+        width: 50px;
+        height: 50px;
+        border-radius: 6px;
+        object-fit: cover;
+        float: left;
+        margin-right: 10px;
+    }
+    
+    .order-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 5px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .order-price {
+        font-size: 14px;
+        font-weight: 700;
+        color: #10b981;
+    }
+    
+    .order-status {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 10px;
+        font-weight: 600;
+        margin-top: 5px;
+    }
+    
+    .status-active {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    
+    .status-completed {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    
+    .no-orders {
+        text-align: center;
+        padding: 30px 10px;
+        color: #94a3b8;
+        font-size: 13px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-page">
+    <div class="container">
+        <div class="mb-3">
+            <a href="{% url 'inbox' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Back to Inbox
+            </a>
+        </div>
+        
+        <div class="chat-card">
+            <div class="chat-wrapper">
+                <div class="chat-main">
+                    <!-- Header -->
+                    <div class="chat-header">
+                        <h5 style="display: flex; align-items: center; gap: 12px;">
+                            {% if other_user.profile.profile_picture %}
+                                <img src="{{ other_user.profile.profile_picture.url }}" alt="{{ other_user.username }}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover; border: 2px solid white;">
+                            {% else %}
+                                <i class="fas fa-user-circle"></i>
+                            {% endif %}
+                            <span>
+                                {{ other_user.username }}
+                                {% if other_user.profile.is_online %}
+                                    <span style="font-size: 12px; opacity: 0.9; font-weight: 400;">
+                                        • <span style="color: #10b981;">Online</span>
+                                    </span>
+                                {% else %}
+                                    <span style="font-size: 12px; opacity: 0.7; font-weight: 400;">
+                                        • Offline
+                                    </span>
+                                {% endif %}
+                            </span>
+                        </h5>
+                        
+                        <div class="header-controls">
+                            {% if item %}
+                                <a href="{% url 'item_detail' item.id %}" class="btn btn-sm btn-light">
+                                    <i class="fas fa-link"></i> View Item
+                                </a>
+                            {% endif %}
+                            <button class="sidebar-toggle-btn" id="sidebarToggle" title="Toggle order history">
+                                <i class="fas fa-chevron-left" id="sidebarIcon"></i>
+                            </button>
+                            <button class="menu-toggle-btn" id="menuToggle" title="More options">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            
+                            <!-- Dropdown Menu -->
+                            <div class="dropdown-menu-custom" id="dropdownMenu">
+                                <a href="{% url 'seller_profile' other_user.username %}">
+                                    <i class="fas fa-user"></i> View Profile
+                                </a>
+                                <a href="#" onclick="alert('Block feature coming soon!'); return false;">
+                                    <i class="fas fa-ban"></i> Block
+                                </a>
+                                <a href="#" onclick="clearChat(); return false;">
+                                    <i class="fas fa-trash-alt"></i> Clear Chat
+                                </a>
+                                <a href="#" onclick="alert('Report feature coming soon!'); return false;">
+                                    <i class="fas fa-flag"></i> Report
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+            
+            <!-- Safety Warning -->
+            <div class="safety-warning">
+                <h6>
+                    <i class="fas fa-exclamation-triangle safety-warning-icon"></i>
+                    Safety Tips:
+                </h6>
+                <ul>
+                    <li>Transactions or communications outside of AuctionHub are not covered by our protection. Be cautious of scams.</li>
+                    <li>Avoid downloading programs or clicking external links from sellers. Report such requests immediately.</li>
+                    <li>Only deliver or exchange account/product info through our secure payment system. Do not share sensitive details in chat.</li>
+                    <li>Report to AuctionHub if a seller marks your order as delivered but you haven't received it.</li>
+                </ul>
+            </div>
+            
+            <!-- Chat Beginning Notice -->
+            {% if not chat_messages %}
+                <div class="chat-beginning">
+                    This is the beginning of your chat history with {{ other_user.username }}
+                </div>
+            {% endif %}
+            
+            <!-- Messages -->
+            <div class="messages-container" id="messagesContainer">
+                {% if chat_messages %}
+                    <div class="message-date">
+                        <span>Today</span>
+                    </div>
+                {% endif %}
+                
+                {% for msg in chat_messages %}
+                    <div class="message {% if msg.sender == request.user %}sent{% else %}received{% endif %}">
+                        <div class="message-bubble">
+                            {% if msg.sender != request.user %}
+                                <strong style="font-size: 12px; color: #6366f1; display: block; margin-bottom: 3px;">
+                                    {{ msg.sender.username }}
+                                    {% if msg.sender.is_superuser %}
+                                        <span class="badge" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; font-size: 9px; padding: 2px 6px; margin-left: 4px; vertical-align: middle;">
+                                            <i class="fas fa-shield-alt"></i> Admin
+                                        </span>
+                                    {% elif msg.sender.profile.seller_status == 'approved' %}
+                                        <span class="badge" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; font-size: 9px; padding: 2px 6px; margin-left: 4px; vertical-align: middle;">
+                                            <i class="fas fa-check-circle"></i> Verified
+                                        </span>
+                                    {% endif %}
+                                </strong>
+                            {% endif %}
+                            
+                            {% if msg.content %}
+                                {{ msg.content }}
+                            {% endif %}
+                            
+                            {% if msg.image %}
+                                <img src="{{ msg.image.url }}" alt="Attached image" class="message-image" onclick="window.open('{{ msg.image.url }}', '_blank')">
+                            {% endif %}
+                            
+                            <div style="font-size: 11px; color: #64748b; margin-top: 6px; text-align: right;">
+                                {{ msg.created_at|date:"g:i A" }}
+                                {% if msg.sender == request.user %}
+                                    <i class="fas fa-check-double" style="color: #34d399;"></i>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="text-center py-5" style="color: #94a3b8;">
+                        <i class="fas fa-comments fa-4x mb-3"></i>
+                        <p>No messages yet. Start the conversation!</p>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Input Area -->
+            <div class="send-container">
+                <form id="messageForm" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="recipient_id" value="{{ other_user.id }}">
+                    {% if item %}
+                        <input type="hidden" name="item_id" value="{{ item.id }}">
+                    {% endif %}
+                    
+                    <div id="imagePreviewContainer" class="image-preview-container"></div>
+                    
+                    <div class="input-wrapper">
+                        <label for="imageInput" class="attach-btn" title="Attach image">
+                            <i class="fas fa-paperclip"></i>
+                        </label>
+                        <input type="file" id="imageInput" name="image" accept="image/*" style="display: none;">
+                        
+                        <textarea 
+                            class="message-input" 
+                            id="messageContent" 
+                            name="content" 
+                            rows="1"
+                            placeholder="Type a message..."
+                        ></textarea>
+                        
+                        <button type="submit" class="send-btn" id="sendBtn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+                </div>
+                
+                <!-- Order Sidebar -->
+                <div class="order-sidebar" id="orderSidebar">
+                    <div class="sidebar-content">
+                        <div class="sidebar-header">
+                            <h6>Purchase History</h6>
+                            <div class="sidebar-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value">{{ total_spent|floatformat:0 }}</div>
+                                    <div class="stat-label">UGX spent</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">{{ order_count }}</div>
+                                    <div class="stat-label">{{ order_count|pluralize:"order,orders" }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="order-tabs">
+                            <button class="order-tab active" onclick="showOrders('active')">
+                                Active ({{ active_orders.count }})
+                            </button>
+                            <button class="order-tab" onclick="showOrders('completed')">
+                                Completed ({{ completed_orders.count }})
+                            </button>
+                        </div>
+                        
+                        <!-- Active Orders -->
+                        <div id="activeOrders" class="order-list">
+                            {% if active_orders %}
+                                {% for order in active_orders %}
+                                    <div class="order-item" onclick="window.location.href='{% url 'item_detail' order.id %}'">
+                                        {% if order.main_image %}
+                                            <img src="{{ order.main_image.url }}" alt="{{ order.title }}" class="order-image">
+                                        {% else %}
+                                            <div class="order-image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                                {{ order.title|first|upper }}
+                                            </div>
+                                        {% endif %}
+                                        <div style="overflow: hidden;">
+                                            <div class="order-title">{{ order.title }}</div>
+                                            <div class="order-price">UGX {{ order.current_price|floatformat:0 }}</div>
+                                            <span class="order-status status-active">BIDDING</span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="no-orders">
+                                    <i class="fas fa-shopping-bag fa-2x mb-2" style="color: #cbd5e1;"></i>
+                                    <p>No active bids with this seller</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Completed Orders -->
+                        <div id="completedOrders" class="order-list" style="display: none;">
+                            {% if completed_orders %}
+                                {% for order in completed_orders %}
+                                    <div class="order-item" onclick="window.location.href='{% url 'item_detail' order.id %}'">
+                                        {% if order.main_image %}
+                                            <img src="{{ order.main_image.url }}" alt="{{ order.title }}" class="order-image">
+                                        {% else %}
+                                            <div class="order-image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                                {{ order.title|first|upper }}
+                                            </div>
+                                        {% endif %}
+                                        <div style="overflow: hidden;">
+                                            <div class="order-title">{{ order.title }}</div>
+                                            <div class="order-price">UGX {{ order.current_price|floatformat:0 }}</div>
+                                            <span class="order-status status-completed">COMPLETED</span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="no-orders">
+                                    <i class="fas fa-box-open fa-2x mb-2" style="color: #cbd5e1;"></i>
+                                    <p>No completed orders with this seller</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const messagesContainer = document.getElementById('messagesContainer');
+    const messageForm = document.getElementById('messageForm');
+    const messageContent = document.getElementById('messageContent');
+    const imageInput = document.getElementById('imageInput');
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    const sendBtn = document.getElementById('sendBtn');
+    let selectedImage = null;
+    
+    // Scroll to bottom
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    // Auto-resize textarea
+    messageContent.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+    
+    // Image preview
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            selectedImage = file;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreviewContainer.innerHTML = `
+                    <div class="image-preview">
+                        <img src="${e.target.result}" alt="Preview">
+                        <span class="remove-preview" onclick="removeImage()">×</span>
+                    </div>
+                `;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    window.removeImage = function() {
+        selectedImage = null;
+        imageInput.value = '';
+        imagePreviewContainer.innerHTML = '';
+    };
+    
+    // Send message
+    messageForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(messageForm);
+        const content = messageContent.value.trim();
+        
+        if (!content && !selectedImage) {
+            return;
+        }
+        
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        
+        fetch('{% url "send_message" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const messageHtml = `
+                    <div class="message sent">
+                        <div class="message-bubble">
+                            ${data.message.content ? data.message.content : ''}
+                            ${data.message.image_url ? `<img src="${data.message.image_url}" alt="Attached image" class="message-image" onclick="window.open('${data.message.image_url}', '_blank')">` : ''}
+                            <div style="font-size: 11px; color: #64748b; margin-top: 6px; text-align: right;">
+                                ${new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                                <i class="fas fa-check-double" style="color: #34d399;"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                messageContent.value = '';
+                messageContent.style.height = 'auto';
+                removeImage();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to send message. Please try again.');
+        })
+        .finally(() => {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+        });
+    });
+    
+    // Send on Enter (Shift+Enter for new line)
+    messageContent.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            messageForm.dispatchEvent(new Event('submit'));
+        }
+    });
+    
+    // Sidebar toggle
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const orderSidebar = document.getElementById('orderSidebar');
+    const sidebarIcon = document.getElementById('sidebarIcon');
+    
+    sidebarToggle.addEventListener('click', function() {
+        orderSidebar.classList.toggle('open');
+        
+        if (orderSidebar.classList.contains('open')) {
+            sidebarIcon.classList.remove('fa-chevron-left');
+            sidebarIcon.classList.add('fa-chevron-right');
+        } else {
+            sidebarIcon.classList.remove('fa-chevron-right');
+            sidebarIcon.classList.add('fa-chevron-left');
+        }
+    });
+    
+    // Dropdown menu toggle
+    const menuToggle = document.getElementById('menuToggle');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    
+    menuToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        dropdownMenu.classList.toggle('show');
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!menuToggle.contains(e.target) && !dropdownMenu.contains(e.target)) {
+            dropdownMenu.classList.remove('show');
+        }
+    });
+});
+
+// Order tab switching
+function showOrders(type) {
+    const activeTab = document.querySelector('.order-tab.active');
+    const tabs = document.querySelectorAll('.order-tab');
+    const activeOrders = document.getElementById('activeOrders');
+    const completedOrders = document.getElementById('completedOrders');
+    
+    tabs.forEach(tab => tab.classList.remove('active'));
+    
+    if (type === 'active') {
+        tabs[0].classList.add('active');
+        activeOrders.style.display = 'block';
+        completedOrders.style.display = 'none';
+    } else {
+        tabs[1].classList.add('active');
+        activeOrders.style.display = 'none';
+        completedOrders.style.display = 'block';
+    }
+}
+
+// Clear chat function
+function clearChat() {
+    if (confirm('Are you sure you want to clear this conversation? This action cannot be undone.')) {
+        alert('Clear chat feature will be implemented soon!');
+    }
+}
+</script>
+{% endblock %}

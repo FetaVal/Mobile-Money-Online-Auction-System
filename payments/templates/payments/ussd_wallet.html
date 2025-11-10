@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}USSD Wallet {{ action|title }} - AuctionHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ussd-wallet-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        text-align: center;
+    }
+    
+    .wallet-header {
+        background: linear-gradient(135deg, {% if action == 'deposit' %}#10b981 0%, #059669 100%{% else %}#f59e0b 0%, #d97706 100%{% endif %});
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+    }
+    
+    .info-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .phone-display {
+        background: #334155;
+        border-radius: 20px;
+        padding: 1.5rem 1rem;
+        margin: 2rem auto;
+        max-width: 400px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container ussd-wallet-container">
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        <a href="{% if action == 'deposit' %}{% url 'wallet_deposit' %}{% else %}{% url 'wallet_withdraw' %}{% endif %}" class="btn btn-primary">
+            Go Back
+        </a>
+    {% else %}
+        <div class="wallet-header">
+            <h1>
+                {% if action == 'deposit' %}
+                    <i class="fas fa-arrow-down"></i> Wallet Deposit
+                {% else %}
+                    <i class="fas fa-arrow-up"></i> Wallet Withdrawal
+                {% endif %}
+            </h1>
+            <p style="opacity: 0.9; margin-top: 1rem;">{{ network|upper }} Mobile Money</p>
+        </div>
+        
+        <div class="info-card">
+            <h4 style="margin-bottom: 1.5rem;">Transaction Details</h4>
+            <div style="text-align: left;">
+                <p><strong>Amount:</strong> UGX {{ amount|floatformat:0 }}</p>
+                <p><strong>Phone Number:</strong> {{ phone_number }}</p>
+                <p><strong>Network:</strong> {{ network|upper }} Mobile Money</p>
+            </div>
+            
+            <div class="alert alert-info" style="margin-top: 1.5rem;">
+                <i class="fas fa-info-circle"></i>
+                A USSD prompt will appear on your phone. Enter your PIN to confirm the {% if action == 'deposit' %}deposit{% else %}withdrawal{% endif %}.
+            </div>
+        </div>
+        
+        <div id="ussd-simulation-area"></div>
+        
+        <button onclick="startUSSD()" class="btn btn-lg" style="background: linear-gradient(135deg, {% if action == 'deposit' %}#10b981 0%, #059669 100%{% else %}#f59e0b 0%, #d97706 100%{% endif %}); color: white; padding: 1rem 2rem; font-weight: 600;">
+            <i class="fas fa-mobile-alt"></i> Initiate {{ action|title }}
+        </button>
+    {% endif %}
+</div>
+
+<script>
+let sessionId = null;
+
+function startUSSD() {
+    fetch('{% url "ussd_wallet_initiate" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: new URLSearchParams({
+            'payment_id': '{{ payment.payment_id }}',
+            'phone_number': '{{ phone_number }}',
+            'network': '{{ network }}',
+            'action': '{{ action }}'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert('Error: ' + data.error);
+            return;
+        }
+        sessionId = data.session_id;
+        showUSSDScreen(data.message);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to initiate USSD session');
+    });
+}
+
+function showUSSDScreen(message) {
+    const area = document.getElementById('ussd-simulation-area');
+    area.innerHTML = `
+        <div class="phone-display">
+            <div style="background: white; color: #000; padding: 1rem; border-radius: 10px; margin-bottom: 1rem; white-space: pre-wrap; text-align: left; font-family: monospace; min-height: 150px;">${message}</div>
+            <input type="text" id="ussd-input" class="form-control" placeholder="Enter PIN (e.g., 1234)" style="margin-bottom: 1rem; text-align: center; font-size: 1.2rem;">
+            <div style="display: flex; gap: 0.5rem;">
+                <button onclick="sendUSSDResponse()" class="btn btn-success" style="flex: 1;">
+                    <i class="fas fa-check"></i> Send
+                </button>
+                <button onclick="cancelUSSD()" class="btn btn-danger" style="flex: 1;">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+            </div>
+        </div>
+    `;
+    document.getElementById('ussd-input').focus();
+}
+
+function sendUSSDResponse() {
+    const input = document.getElementById('ussd-input').value.trim();
+    
+    if (!input) {
+        alert('Please enter your PIN');
+        return;
+    }
+    
+    fetch('{% url "ussd_wallet_respond" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: new URLSearchParams({
+            'session_id': sessionId,
+            'input': input
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert('Error: ' + data.error);
+            return;
+        }
+        
+        showUSSDScreen(data.message);
+        
+        if (data.end_session) {
+            document.getElementById('ussd-input').remove();
+            setTimeout(() => {
+                window.location.href = '{% url "wallet_dashboard" %}';
+            }, 3000);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to send USSD response');
+    });
+}
+
+function cancelUSSD() {
+    window.location.href = '{% if action == "deposit" %}{% url "wallet_deposit" %}{% else %}{% url "wallet_withdraw" %}{% endif %}';
+}
+
+document.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' && document.getElementById('ussd-input')) {
+        sendUSSDResponse();
+    }
+});
+</script>
+{% endblock %}

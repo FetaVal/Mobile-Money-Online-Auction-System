@@ -1,0 +1,395 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Two-Factor Authentication{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+    
+    .verify-container {
+        max-width: 500px;
+        margin: 100px auto;
+        padding: 0 20px;
+    }
+    
+    .verify-card {
+        background: white;
+        border-radius: 20px;
+        padding: 50px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        animation: slideIn 0.5s ease;
+    }
+    
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(-30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .verify-header {
+        text-align: center;
+        margin-bottom: 35px;
+    }
+    
+    .verify-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 40px;
+        color: white;
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .verify-title {
+        font-size: 28px;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 10px;
+    }
+    
+    .verify-subtitle {
+        font-size: 15px;
+        color: #64748b;
+        line-height: 1.6;
+    }
+    
+    .code-input-container {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin: 35px 0;
+    }
+    
+    .code-digit {
+        width: 60px;
+        height: 70px;
+        font-size: 32px;
+        font-weight: 700;
+        text-align: center;
+        border: 3px solid #e2e8f0;
+        border-radius: 12px;
+        transition: all 0.3s;
+        background: #f8fafc;
+    }
+    
+    .code-digit:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        transform: scale(1.05);
+    }
+    
+    .code-digit.filled {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+    
+    .timer-container {
+        text-align: center;
+        margin: 25px 0;
+        padding: 20px;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        border-radius: 12px;
+        color: white;
+    }
+    
+    .timer-label {
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+        opacity: 0.9;
+    }
+    
+    .timer-value {
+        font-size: 36px;
+        font-weight: 800;
+        font-family: 'Courier New', monospace;
+    }
+    
+    .verify-btn {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .verify-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+    }
+    
+    .verify-btn:active {
+        transform: translateY(0);
+    }
+    
+    .verify-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .help-text {
+        text-align: center;
+        margin-top: 25px;
+        color: #64748b;
+        font-size: 14px;
+        line-height: 1.8;
+    }
+    
+    .resend-link {
+        color: #667eea;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: color 0.3s;
+    }
+    
+    .resend-link:hover {
+        color: #764ba2;
+        text-decoration: underline;
+    }
+    
+    .security-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 25px;
+        padding: 12px;
+        background: #f0fdf4;
+        border-radius: 10px;
+        color: #16a34a;
+        font-size: 13px;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="verify-container">
+    <div class="verify-card">
+        <div class="verify-header">
+            <div class="verify-icon">
+                🔐
+            </div>
+            <h1 class="verify-title">Two-Factor Authentication</h1>
+            <p class="verify-subtitle">
+                A 6-digit verification code has been sent to<br>
+                <strong>{{ user.email }}</strong>
+            </p>
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} mb-3" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <form method="post" id="verifyForm">
+            {% csrf_token %}
+            
+            <div class="code-input-container">
+                <input type="text" class="code-digit" maxlength="1" id="digit1" autofocus>
+                <input type="text" class="code-digit" maxlength="1" id="digit2">
+                <input type="text" class="code-digit" maxlength="1" id="digit3">
+                <input type="text" class="code-digit" maxlength="1" id="digit4">
+                <input type="text" class="code-digit" maxlength="1" id="digit5">
+                <input type="text" class="code-digit" maxlength="1" id="digit6">
+            </div>
+            
+            <input type="hidden" name="code" id="codeInput">
+            
+            <div class="timer-container">
+                <div class="timer-label">Code Expires In</div>
+                <div class="timer-value" id="timer">{{ time_remaining }}s</div>
+            </div>
+            
+            <button type="submit" class="verify-btn" id="submitBtn">
+                <i class="fas fa-shield-alt"></i> Verify Code
+            </button>
+        </form>
+        
+        <div class="help-text">
+            Lost access to your 2FA device?<br>
+            <a href="#" class="resend-link" id="useBackupBtn">Use a backup code instead</a>
+            <br><br>
+            <a href="{% url 'login' %}" class="resend-link">Go back to login</a>
+        </div>
+        
+        <!-- Backup Code Form (Hidden by default) -->
+        <form method="post" id="backupForm" style="display: none;">
+            {% csrf_token %}
+            <div class="verify-header mt-4">
+                <h3 class="verify-title" style="font-size: 22px;">Enter Backup Code</h3>
+                <p class="verify-subtitle">
+                    Enter one of your 8-character backup codes
+                </p>
+            </div>
+            
+            <div class="mb-3">
+                <input type="text" 
+                       name="code" 
+                       id="backupCodeInput" 
+                       class="form-control" 
+                       placeholder="XXXXXXXX" 
+                       maxlength="8" 
+                       style="text-align: center; font-size: 24px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; padding: 20px; border: 3px solid #e2e8f0; border-radius: 12px;">
+                <input type="hidden" name="use_backup" value="true">
+            </div>
+            
+            <button type="submit" class="verify-btn">
+                <i class="fas fa-key"></i> Verify Backup Code
+            </button>
+            
+            <div class="help-text mt-3">
+                <a href="#" class="resend-link" id="useRegularBtn">Use regular 2FA code</a>
+            </div>
+        </form>
+        
+        <div class="security-badge">
+            <i class="fas fa-check-circle"></i>
+            Protected by 256-bit encryption
+        </div>
+    </div>
+</div>
+
+<script>
+const digits = document.querySelectorAll('.code-digit');
+const codeInput = document.getElementById('codeInput');
+const submitBtn = document.getElementById('submitBtn');
+const timerDisplay = document.getElementById('timer');
+let timeRemaining = {{ time_remaining }};
+
+// Auto-focus and auto-advance between digit inputs
+digits.forEach((digit, index) => {
+    digit.addEventListener('input', (e) => {
+        const value = e.target.value;
+        
+        // Only allow digits
+        if (!/^\d$/.test(value)) {
+            e.target.value = '';
+            return;
+        }
+        
+        // Add filled class
+        e.target.classList.add('filled');
+        
+        // Move to next input
+        if (value && index < digits.length - 1) {
+            digits[index + 1].focus();
+        }
+        
+        // Update hidden input
+        updateCodeInput();
+    });
+    
+    // Handle backspace
+    digit.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !e.target.value && index > 0) {
+            digits[index - 1].focus();
+            digits[index - 1].value = '';
+            digits[index - 1].classList.remove('filled');
+            updateCodeInput();
+        }
+    });
+    
+    // Handle paste
+    digit.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const pasteData = e.clipboardData.getData('text').replace(/\D/g, '');
+        
+        for (let i = 0; i < Math.min(pasteData.length, 6); i++) {
+            if (digits[i]) {
+                digits[i].value = pasteData[i];
+                digits[i].classList.add('filled');
+            }
+        }
+        
+        updateCodeInput();
+        
+        if (pasteData.length >= 6) {
+            digits[5].focus();
+        }
+    });
+});
+
+function updateCodeInput() {
+    const code = Array.from(digits).map(d => d.value).join('');
+    codeInput.value = code;
+    
+    // Enable/disable submit button
+    submitBtn.disabled = code.length !== 6;
+}
+
+// Countdown timer
+function updateTimer() {
+    if (timeRemaining <= 0) {
+        timerDisplay.textContent = 'EXPIRED';
+        timerDisplay.style.color = '#ef4444';
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Code Expired - Return to Login';
+        submitBtn.onclick = () => { window.location.href = '{% url "login" %}'; return false; };
+        return;
+    }
+    
+    const minutes = Math.floor(timeRemaining / 60);
+    const seconds = timeRemaining % 60;
+    timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    
+    timeRemaining--;
+    setTimeout(updateTimer, 1000);
+}
+
+updateTimer();
+
+// Auto-submit on complete code
+document.getElementById('verifyForm').addEventListener('submit', (e) => {
+    if (codeInput.value.length !== 6) {
+        e.preventDefault();
+        alert('Please enter all 6 digits');
+    }
+});
+
+// Toggle between regular 2FA and backup code
+document.getElementById('useBackupBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('verifyForm').style.display = 'none';
+    document.getElementById('backupForm').style.display = 'block';
+    document.getElementById('backupCodeInput').focus();
+});
+
+document.getElementById('useRegularBtn').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('verifyForm').style.display = 'block';
+    document.getElementById('backupForm').style.display = 'none';
+    digits[0].focus();
+});
+
+// Auto-uppercase backup code input
+document.getElementById('backupCodeInput').addEventListener('input', (e) => {
+    e.target.value = e.target.value.toUpperCase().replace(/[^0-9A-F]/g, '');
+});
+</script>
+{% endblock %}

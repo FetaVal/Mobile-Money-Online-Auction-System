@@ -1,0 +1,406 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Seller Applications - Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+    /* Fix table layout and text clipping */
+    .table-responsive {
+        overflow-x: auto;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .table {
+        margin: 0;
+        width: 100%;
+    }
+    
+    .table td, .table th {
+        overflow: visible !important;
+        white-space: normal !important;
+        padding: 0.75rem !important;
+        vertical-align: middle !important;
+        border: none;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .table thead th {
+        border-bottom: 2px solid #dee2e6;
+    }
+    
+    .table td a {
+        margin: 0;
+        padding: 0;
+        text-decoration: none;
+    }
+    
+    .table td a:hover {
+        text-decoration: underline;
+    }
+    
+    .card-body {
+        overflow-x: visible;
+        padding: 1.25rem;
+    }
+    
+    /* Ensure no text is cut off */
+    td, th {
+        box-sizing: border-box;
+    }
+    
+    /* Fix for button alignment */
+    .table td .btn {
+        margin-left: 0;
+        margin-right: 5px;
+    }
+    
+    /* Remove any negative margins */
+    .table-hover tbody tr {
+        margin: 0;
+        padding: 0;
+    }
+    
+    /* Make sure links are fully visible */
+    .table td strong,
+    .table td a {
+        display: inline-block;
+        width: auto;
+        max-width: 100%;
+    }
+    
+    /* Aggressive fix for text clipping - ensure no negative margins or positioning */
+    .table tbody tr,
+    .table tbody td {
+        position: relative !important;
+        left: 0 !important;
+        right: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+    
+    /* Ensure first column has proper spacing */
+    .table td:first-child,
+    .table th:first-child {
+        padding-left: 1rem !important;
+    }
+    
+    /* Remove any container negative margins */
+    .container-fluid,
+    .card,
+    .card-body,
+    .table-responsive {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+    
+    /* Fix for username links */
+    .table td a {
+        overflow: visible !important;
+        text-overflow: clip !important;
+    }
+</style>
+{% endblock %}
+
+{% block admin_content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-store-alt"></i> Seller Applications</h2>
+                <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h6>Pending Review</h6>
+                    <h3>{{ pending_count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h6>Approved</h6>
+                    <h3>{{ approved_count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger">
+                <div class="card-body">
+                    <h6>Rejected</h6>
+                    <h3>{{ rejected_count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h6>Total Applications</h6>
+                    <h3>{{ pending_count|add:approved_count|add:rejected_count }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header bg-white">
+            <div class="row">
+                <div class="col-md-6">
+                    <form method="get" class="form-inline">
+                        <div class="input-group">
+                            <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Search by business name, username...">
+                            <div class="input-group-append">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-6 text-right">
+                    <div class="btn-group">
+                        <a href="?status=all" class="btn btn-sm {% if status_filter == 'all' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                            All ({{ pending_count|add:approved_count|add:rejected_count }})
+                        </a>
+                        <a href="?status=pending" class="btn btn-sm {% if status_filter == 'pending' %}btn-warning{% else %}btn-outline-warning{% endif %}">
+                            Pending ({{ pending_count }})
+                        </a>
+                        <a href="?status=approved" class="btn btn-sm {% if status_filter == 'approved' %}btn-success{% else %}btn-outline-success{% endif %}">
+                            Approved ({{ approved_count }})
+                        </a>
+                        <a href="?status=rejected" class="btn btn-sm {% if status_filter == 'rejected' %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                            Rejected ({{ rejected_count }})
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <p class="text-muted">Showing {{ total_count }} application(s)</p>
+            
+            {% if applications %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Business Name</th>
+                                <th>Username</th>
+                                <th>Business Type</th>
+                                <th>Experience</th>
+                                <th>Phone</th>
+                                <th>Applied Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app in applications %}
+                            <tr>
+                                <td>
+                                    <strong>{{ app.business_name }}</strong>
+                                    <button class="btn btn-sm btn-link" data-toggle="modal" data-target="#detailsModal{{ app.id }}">
+                                        <i class="fas fa-info-circle"></i> Details
+                                    </button>
+                                </td>
+                                <td>
+                                    <a href="{% url 'seller_profile' app.user.username %}">{{ app.user.username }}</a>
+                                </td>
+                                <td>{{ app.get_business_type_display }}</td>
+                                <td>{{ app.years_of_experience }} years</td>
+                                <td>{{ app.phone_number }}</td>
+                                <td>{{ app.seller_application_date|date:"M d, Y" }}</td>
+                                <td>
+                                    {% if app.seller_status == 'pending' %}
+                                        <span class="badge badge-warning">Pending</span>
+                                    {% elif app.seller_status == 'approved' %}
+                                        <span class="badge badge-success">Approved</span>
+                                    {% elif app.seller_status == 'rejected' %}
+                                        <span class="badge badge-danger">Rejected</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if app.seller_status == 'pending' %}
+                                        <form method="post" action="{% url 'admin_approve_seller' app.user.id %}" style="display:inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Approve this seller application?');">
+                                                <i class="fas fa-check"></i> Approve
+                                            </button>
+                                        </form>
+                                        <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#rejectModal{{ app.id }}">
+                                            <i class="fas fa-times"></i> Reject
+                                        </button>
+                                    {% elif app.seller_status == 'approved' %}
+                                        <small class="text-success">
+                                            <i class="fas fa-check-circle"></i> Approved on {{ app.seller_approval_date|date:"M d, Y" }}
+                                        </small>
+                                    {% elif app.seller_status == 'rejected' %}
+                                        <small class="text-danger">
+                                            <i class="fas fa-times-circle"></i> Rejected
+                                        </small>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            <div class="modal fade" id="detailsModal{{ app.id }}" tabindex="-1" role="dialog">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Application Details - {{ app.business_name }}</h5>
+                                            <button type="button" class="close" data-dismiss="modal">
+                                                <span>&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h6>Business Information</h6>
+                                                    <table class="table table-sm">
+                                                        <tr>
+                                                            <th>Business Name:</th>
+                                                            <td>{{ app.business_name }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Business Type:</th>
+                                                            <td>{{ app.get_business_type_display }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Registration #:</th>
+                                                            <td>{{ app.business_registration_number|default:"N/A" }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Experience:</th>
+                                                            <td>{{ app.years_of_experience }} years</td>
+                                                        </tr>
+                                                    </table>
+                                                    <h6 class="mt-3">Banking Details</h6>
+                                                    <table class="table table-sm">
+                                                        <tr>
+                                                            <th>Bank:</th>
+                                                            <td>{{ app.get_bank_name_display }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Account Name:</th>
+                                                            <td>{{ app.bank_account_name }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Account Number:</th>
+                                                            <td>{{ app.bank_account_number }}</td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h6>Contact Information</h6>
+                                                    <table class="table table-sm">
+                                                        <tr>
+                                                            <th>Username:</th>
+                                                            <td>{{ app.user.username }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Email:</th>
+                                                            <td>{{ app.user.email }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Phone:</th>
+                                                            <td>{{ app.phone_number }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>National ID:</th>
+                                                            <td>{{ app.national_id_number }}</td>
+                                                        </tr>
+                                                    </table>
+                                                    
+                                                    <h6 class="mt-3"><i class="fas fa-id-card"></i> National ID Verification Photos</h6>
+                                                    <div class="row">
+                                                        <div class="col-md-6 mb-2">
+                                                            <p class="small font-weight-bold mb-1">Front of ID:</p>
+                                                            {% if app.national_id_front %}
+                                                                <a href="{{ app.national_id_front.url }}" target="_blank">
+                                                                    <img src="{{ app.national_id_front.url }}" alt="ID Front" class="img-fluid border" style="max-height: 150px; cursor: pointer;">
+                                                                </a>
+                                                            {% else %}
+                                                                <p class="text-muted small"><em>No photo uploaded</em></p>
+                                                            {% endif %}
+                                                        </div>
+                                                        <div class="col-md-6 mb-2">
+                                                            <p class="small font-weight-bold mb-1">Back of ID:</p>
+                                                            {% if app.national_id_back %}
+                                                                <a href="{{ app.national_id_back.url }}" target="_blank">
+                                                                    <img src="{{ app.national_id_back.url }}" alt="ID Back" class="img-fluid border" style="max-height: 150px; cursor: pointer;">
+                                                                </a>
+                                                            {% else %}
+                                                                <p class="text-muted small"><em>No photo uploaded</em></p>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <h6 class="mt-3">Business Description</h6>
+                                                    <p class="small">{{ app.business_description }}</p>
+                                                    <h6 class="mt-3">Product Categories</h6>
+                                                    <p class="small">{{ app.product_categories }}</p>
+                                                </div>
+                                            </div>
+                                            {% if app.seller_status == 'rejected' and app.rejection_reason %}
+                                                <div class="alert alert-danger mt-3">
+                                                    <strong>Rejection Reason:</strong> {{ app.rejection_reason }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal fade" id="rejectModal{{ app.id }}" tabindex="-1" role="dialog">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <form method="post" action="{% url 'admin_reject_seller' app.user.id %}">
+                                            {% csrf_token %}
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Reject Seller Application</h5>
+                                                <button type="button" class="close" data-dismiss="modal">
+                                                    <span>&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>You are about to reject the seller application for <strong>{{ app.business_name }}</strong> ({{ app.user.username }}).</p>
+                                                <div class="form-group">
+                                                    <label for="rejection_reason">Rejection Reason:</label>
+                                                    <textarea name="rejection_reason" class="form-control" rows="3" required placeholder="Provide a clear reason for rejection..."></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-danger">
+                                                    <i class="fas fa-times"></i> Reject Application
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-inbox text-muted" style="font-size: 4rem;"></i>
+                    <p class="text-muted mt-3">No seller applications found.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

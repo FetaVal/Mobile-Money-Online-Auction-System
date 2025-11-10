@@ -1,0 +1,318 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Setup Authenticator App{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+    
+    .totp-container {
+        max-width: 600px;
+        margin: 80px auto;
+        padding: 0 20px;
+    }
+    
+    .totp-card {
+        background: white;
+        border-radius: 20px;
+        padding: 50px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        animation: slideIn 0.5s ease;
+    }
+    
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(-30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .totp-header {
+        text-align: center;
+        margin-bottom: 35px;
+    }
+    
+    .totp-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 40px;
+        color: white;
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .totp-title {
+        font-size: 28px;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 10px;
+    }
+    
+    .totp-subtitle {
+        font-size: 15px;
+        color: #64748b;
+        line-height: 1.6;
+    }
+    
+    .setup-steps {
+        margin: 30px 0;
+    }
+    
+    .step {
+        padding: 25px;
+        background: #f8fafc;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        border-left: 4px solid #667eea;
+    }
+    
+    .step-number {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 30px;
+        font-weight: 700;
+        margin-right: 10px;
+    }
+    
+    .step-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 10px;
+    }
+    
+    .step-content {
+        color: #64748b;
+        line-height: 1.7;
+    }
+    
+    .qr-code-container {
+        text-align: center;
+        padding: 30px;
+        background: white;
+        border-radius: 12px;
+        margin: 20px 0;
+        border: 2px solid #e2e8f0;
+    }
+    
+    .qr-code-container img {
+        max-width: 250px;
+        border: 3px solid #667eea;
+        border-radius: 12px;
+    }
+    
+    .secret-key {
+        background: #f1f5f9;
+        padding: 15px;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        font-weight: 700;
+        color: #1e293b;
+        word-break: break-all;
+        margin-top: 15px;
+        border: 2px dashed #cbd5e1;
+    }
+    
+    .verification-form {
+        margin-top: 30px;
+    }
+    
+    .form-group label {
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 10px;
+        display: block;
+    }
+    
+    .code-input {
+        width: 100%;
+        padding: 15px;
+        font-size: 24px;
+        text-align: center;
+        border: 3px solid #e2e8f0;
+        border-radius: 12px;
+        font-family: 'Courier New', monospace;
+        font-weight: 700;
+        letter-spacing: 5px;
+        transition: all 0.3s;
+    }
+    
+    .code-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    }
+    
+    .submit-btn {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-top: 20px;
+    }
+    
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+    }
+    
+    .cancel-btn {
+        width: 100%;
+        padding: 12px;
+        background: #f1f5f9;
+        color: #475569;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 10px;
+        text-decoration: none;
+        display: block;
+        text-align: center;
+    }
+    
+    .cancel-btn:hover {
+        background: #e2e8f0;
+        text-decoration: none;
+        color: #475569;
+    }
+    
+    .app-suggestions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .app-badge {
+        padding: 8px 16px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="totp-container">
+    <div class="totp-card">
+        <div class="totp-header">
+            <div class="totp-icon">
+                <i class="fas fa-mobile-alt"></i>
+            </div>
+            <h1 class="totp-title">Setup Authenticator App</h1>
+            <p class="totp-subtitle">
+                Use an authenticator app for enhanced security
+            </p>
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} mb-3" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <div class="setup-steps">
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">1</span>
+                    Download an Authenticator App
+                </div>
+                <div class="step-content">
+                    Install a compatible authenticator app on your mobile device:
+                    <div class="app-suggestions">
+                        <span class="app-badge">📱 Google Authenticator</span>
+                        <span class="app-badge">🔐 Authy</span>
+                        <span class="app-badge">🛡️ Microsoft Authenticator</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">2</span>
+                    Scan the QR Code
+                </div>
+                <div class="step-content">
+                    Open your authenticator app and scan this QR code:
+                    <div class="qr-code-container">
+                        <img src="data:image/png;base64,{{ qr_code_data }}" alt="TOTP QR Code">
+                        <div class="secret-key">
+                            <small>Or enter this code manually:</small><br>
+                            {{ totp_secret }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-title">
+                    <span class="step-number">3</span>
+                    Verify Setup
+                </div>
+                <div class="step-content">
+                    Enter the 6-digit code from your authenticator app to complete setup:
+                    
+                    <form method="post" class="verification-form">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="code">Verification Code</label>
+                            <input type="text" 
+                                   id="code" 
+                                   name="code" 
+                                   class="code-input" 
+                                   maxlength="6" 
+                                   placeholder="000000"
+                                   pattern="[0-9]{6}"
+                                   required
+                                   autofocus>
+                        </div>
+                        
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-check-circle"></i> Verify & Enable
+                        </button>
+                    </form>
+                    
+                    <a href="{% url 'security_settings' %}" class="cancel-btn">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-format input as 6 digits
+document.getElementById('code').addEventListener('input', function(e) {
+    this.value = this.value.replace(/\D/g, '').substring(0, 6);
+});
+</script>
+{% endblock %}

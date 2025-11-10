@@ -1,0 +1,339 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log in to your PayPal account</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .paypal-container {
+            width: 100%;
+            max-width: 450px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .paypal-header {
+            background: #ffffff;
+            padding: 30px 20px 20px;
+            text-align: center;
+            border-bottom: 1px solid #e1e8ee;
+        }
+
+        .paypal-logo {
+            font-family: Verdana, Tahoma, sans-serif;
+            font-weight: bold;
+            font-size: 32px;
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+        }
+
+        .logo-pay {
+            color: #003087;
+        }
+
+        .logo-pal {
+            color: #009cde;
+        }
+
+        .payment-info {
+            background: #f5f7fa;
+            padding: 15px;
+            text-align: center;
+            border-top: 1px solid #e1e8ee;
+            border-bottom: 1px solid #e1e8ee;
+        }
+
+        .payment-amount {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c2e2f;
+            margin-bottom: 5px;
+        }
+
+        .payment-details {
+            font-size: 13px;
+            color: #6c7378;
+        }
+
+        .login-box {
+            padding: 40px 30px;
+        }
+
+        .login-form {
+            width: 100%;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            color: #2c2e2f;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 16px;
+            border: 1px solid #cbd2d9;
+            border-radius: 4px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: #0070ba;
+            box-shadow: 0 0 0 3px rgba(0, 112, 186, 0.1);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+            background: #0070ba;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.1s ease;
+            margin-bottom: 16px;
+        }
+
+        .btn-login:hover {
+            background: #005a92;
+        }
+
+        .btn-login:active {
+            transform: scale(0.98);
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .forgot-password a {
+            font-size: 14px;
+            color: #0070ba;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password a:hover {
+            color: #005a92;
+            text-decoration: underline;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 30px 0;
+            color: #9da3a6;
+            font-size: 14px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #cbd2d9;
+        }
+
+        .divider span {
+            padding: 0 16px;
+        }
+
+        .btn-signup {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #0070ba;
+            background: #ffffff;
+            border: 1px solid #0070ba;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: background 0.3s ease, color 0.3s ease, transform 0.1s ease;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+        }
+
+        .btn-signup:hover {
+            background: #f5f7fa;
+            color: #0070ba;
+        }
+
+        .btn-signup:active {
+            transform: scale(0.98);
+        }
+
+        .paypal-footer {
+            background: #f5f7fa;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #e1e8ee;
+        }
+
+        .paypal-footer p {
+            font-size: 12px;
+            color: #6c7378;
+            margin: 0;
+        }
+
+        .secure-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #6c7378;
+        }
+
+        .secure-badge svg {
+            width: 16px;
+            height: 16px;
+            fill: #28a745;
+        }
+
+        @media (max-width: 480px) {
+            .paypal-container {
+                max-width: 100%;
+                border-radius: 0;
+            }
+
+            .login-box {
+                padding: 30px 20px;
+            }
+
+            .paypal-logo {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="paypal-container">
+        <div class="paypal-header">
+            <div class="paypal-logo">
+                <span class="logo-pay">Pay</span><span class="logo-pal">Pal</span>
+            </div>
+        </div>
+
+        <div class="payment-info">
+            <div class="payment-amount">UGX {{ total_amount|floatformat:0|default:"0" }}</div>
+            <div class="payment-details">
+                {{ payment_type|default:"Payment" }} - AuctionHub
+                <br>
+                <small>Amount: UGX {{ base_amount|floatformat:0 }} + Tax (5%): UGX {{ tax_amount|floatformat:0 }}</small>
+            </div>
+        </div>
+
+        <main class="login-box">
+            <form class="login-form" method="POST" action="{% url 'process_paypal_payment' %}">
+                {% csrf_token %}
+                <input type="hidden" name="payment_id" value="{{ payment_id }}">
+                <input type="hidden" name="return_url" value="{{ return_url }}">
+                <input type="hidden" name="payment_context" value="{{ payment_context }}">
+
+                <div class="form-group">
+                    <label for="email" class="form-label">Email address or mobile number</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        class="form-input" 
+                        required 
+                        autocomplete="email"
+                        placeholder="Email or phone number"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        class="form-input" 
+                        required 
+                        autocomplete="current-password"
+                        placeholder="Enter your password"
+                    >
+                </div>
+
+                <button type="submit" class="btn-login">Log In</button>
+
+                <div class="forgot-password">
+                    <a href="#" onclick="alert('Demo mode: Password reset not available'); return false;">Having trouble logging in?</a>
+                </div>
+
+                <div class="secure-badge">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+                    </svg>
+                    <span>Your payment is secured with 256-bit encryption</span>
+                </div>
+
+                <div class="divider">
+                    <span>or</span>
+                </div>
+
+                <a href="{{ cancel_url }}" class="btn-signup">Cancel Payment</a>
+            </form>
+        </main>
+
+        <footer class="paypal-footer">
+            <p>&copy; 1999-2025 PayPal, Inc. All rights reserved.</p>
+            <p style="margin-top: 8px; font-size: 11px; color: #9da3a6;">Demo Mode - For Educational Purposes</p>
+        </footer>
+    </div>
+
+    <script>
+        // Form validation
+        document.querySelector('.login-form').addEventListener('submit', function(e) {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                e.preventDefault();
+                alert('Please enter both email and password');
+                return false;
+            }
+
+            if (password.length < 6) {
+                e.preventDefault();
+                alert('Please enter a valid password');
+                return false;
+            }
+        });
+    </script>
+</body>
+</html>

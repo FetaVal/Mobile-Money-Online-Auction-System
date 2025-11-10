@@ -1,0 +1,392 @@
+{% extends "base.html" %}
+
+{% block title %}Seller Dashboard - AuctionHub{% endblock %}
+
+{% block content %}
+<style>
+    .stat-card {
+        border-radius: 10px;
+        transition: transform 0.2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    .stat-icon {
+        font-size: 2.5rem;
+        opacity: 0.2;
+        position: absolute;
+        right: 20px;
+        top: 20px;
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-chart-line"></i> Seller Dashboard</h2>
+            <p class="text-muted">Welcome back, {{ profile.business_name }}! Here's how your business is performing.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card stat-card bg-gradient-primary text-white shadow">
+                <div class="card-body position-relative">
+                    <i class="fas fa-dollar-sign stat-icon"></i>
+                    <h6 class="text-uppercase mb-1">Total Revenue</h6>
+                    <h3 class="mb-0">UGX {{ total_revenue|floatformat:0|default:"0" }}</h3>
+                    <small>Net: UGX {{ net_revenue|floatformat:0|default:"0" }}</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card stat-card bg-gradient-success text-white shadow">
+                <div class="card-body position-relative">
+                    <i class="fas fa-shopping-cart stat-icon"></i>
+                    <h6 class="text-uppercase mb-1">Total Sales</h6>
+                    <h3 class="mb-0">{{ total_sales }}</h3>
+                    <small>This month: {{ monthly_sales }}</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card stat-card bg-gradient-info text-white shadow">
+                <div class="card-body position-relative">
+                    <i class="fas fa-eye stat-icon"></i>
+                    <h6 class="text-uppercase mb-1">Total Views</h6>
+                    <h3 class="mb-0">{{ total_views|default:"0" }}</h3>
+                    <small>Across all listings</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card stat-card bg-gradient-warning text-white shadow">
+                <div class="card-body position-relative">
+                    <i class="fas fa-star stat-icon"></i>
+                    <h6 class="text-uppercase mb-1">Seller Rating</h6>
+                    <h3 class="mb-0">{{ avg_rating|floatformat:1 }}/5.0</h3>
+                    <small>{{ total_reviews }} reviews</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Active Listings</h6>
+                            <h4 class="mb-0">{{ active_listings }}</h4>
+                        </div>
+                        <i class="fas fa-list text-primary" style="font-size: 2rem; opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Conversion Rate</h6>
+                            <h4 class="mb-0">{{ conversion_rate }}%</h4>
+                        </div>
+                        <i class="fas fa-percentage text-success" style="font-size: 2rem; opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Avg Sale Price</h6>
+                            <h4 class="mb-0">UGX {{ avg_sale_price|floatformat:0|default:"0" }}</h4>
+                        </div>
+                        <i class="fas fa-coins text-warning" style="font-size: 2rem; opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Platform Tax Paid</h6>
+                            <h4 class="mb-0">UGX {{ platform_tax_paid|floatformat:0|default:"0" }}</h4>
+                        </div>
+                        <i class="fas fa-receipt text-info" style="font-size: 2rem; opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-trophy text-warning"></i> Top Performing Products</h5>
+                </div>
+                <div class="card-body">
+                    {% if top_performing_items %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Final Price</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in top_performing_items %}
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'item_detail' item.id %}">{{ item.title|truncatewords:5 }}</a>
+                                        </td>
+                                        <td class="text-success font-weight-bold">UGX {{ item.current_price|floatformat:0 }}</td>
+                                        <td>
+                                            <span class="badge badge-success">Sold</span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center py-4">No sold items yet. Keep listing quality products!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie text-primary"></i> Sales by Category</h5>
+                </div>
+                <div class="card-body">
+                    {% if items_by_category %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th>Items</th>
+                                        <th>Revenue</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for cat in items_by_category %}
+                                    <tr>
+                                        <td>{{ cat.category__name|default:"Uncategorized" }}</td>
+                                        <td><span class="badge badge-primary">{{ cat.count }}</span></td>
+                                        <td class="text-success">UGX {{ cat.revenue|floatformat:0|default:"0" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center py-4">No category data available yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-history text-success"></i> Recent Sales</h5>
+                    <span class="badge badge-pill badge-success">Last 10</span>
+                </div>
+                <div class="card-body">
+                    {% if recent_sales %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Sold For</th>
+                                        <th>Buyer</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in recent_sales %}
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'item_detail' item.id %}">{{ item.title|truncatewords:6 }}</a>
+                                        </td>
+                                        <td class="text-success font-weight-bold">UGX {{ item.current_price|floatformat:0 }}</td>
+                                        <td>
+                                            {% if item.winner %}
+                                                <a href="{% url 'seller_profile' item.winner.username %}">{{ item.winner.username }}</a>
+                                            {% else %}
+                                                <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-muted small">{{ item.end_time|date:"M d, Y" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-inbox text-muted" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-3">No sales yet. Start listing items to see results here!</p>
+                            <a href="{% url 'sell_item' %}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> List New Item
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-comments text-info"></i> Recent Reviews</h5>
+                </div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    {% if recent_reviews %}
+                        {% for review in recent_reviews %}
+                        <div class="mb-3 pb-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong>{{ review.reviewer.username }}</strong>
+                                    <div class="text-warning small">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= review.rating %}
+                                                <i class="fas fa-star"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <small class="text-muted">{{ review.created_at|date:"M d" }}</small>
+                            </div>
+                            <p class="small text-muted mb-1">{{ review.comment|truncatewords:15 }}</p>
+                            <small class="text-primary">
+                                <a href="{% url 'item_detail' review.item.id %}">{{ review.item.title|truncatewords:4 }}</a>
+                            </small>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted text-center py-4">No reviews yet. Encourage buyers to leave feedback!</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-boxes text-primary"></i> Active Listings</h5>
+                </div>
+                <div class="card-body">
+                    {% if active_items %}
+                        <div class="row">
+                            {% for item in active_items %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card">
+                                    {% if item.main_image %}
+                                        <img src="{{ item.main_image.url }}" class="card-img-top" alt="{{ item.title }}" style="height: 200px; object-fit: cover;">
+                                    {% endif %}
+                                    <div class="card-body">
+                                        <h6 class="card-title">{{ item.title|truncatewords:5 }}</h6>
+                                        <p class="text-success font-weight-bold mb-2">UGX {{ item.current_price|floatformat:0 }}</p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">
+                                                <i class="fas fa-eye"></i> {{ item.views }} views
+                                            </small>
+                                            <small class="text-muted">
+                                                <i class="fas fa-gavel"></i> {{ item.bid_count }} bids
+                                            </small>
+                                        </div>
+                                        <a href="{% url 'item_detail' item.id %}" class="btn btn-sm btn-primary btn-block mt-2">
+                                            View Details
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-inbox text-muted" style="font-size: 3rem;"></i>
+                            <p class="text-muted mt-3">No active listings. List a new item to start selling!</p>
+                            <a href="{% url 'sell_item' %}" class="btn btn-success btn-lg">
+                                <i class="fas fa-plus"></i> Create New Listing
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle text-info"></i> Quick Tips for Success</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="media mb-3">
+                                <i class="fas fa-camera text-primary mr-3" style="font-size: 2rem;"></i>
+                                <div class="media-body">
+                                    <h6>Use Quality Images</h6>
+                                    <p class="small text-muted">Items with clear, high-quality photos get 3x more bids.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="media mb-3">
+                                <i class="fas fa-tags text-success mr-3" style="font-size: 2rem;"></i>
+                                <div class="media-body">
+                                    <h6>Competitive Pricing</h6>
+                                    <p class="small text-muted">Research similar items to set the right starting price.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="media mb-3">
+                                <i class="fas fa-shipping-fast text-warning mr-3" style="font-size: 2rem;"></i>
+                                <div class="media-body">
+                                    <h6>Fast Response</h6>
+                                    <p class="small text-muted">Reply to buyer inquiries within 24 hours for better ratings.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

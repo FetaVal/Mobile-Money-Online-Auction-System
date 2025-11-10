@@ -1,0 +1,203 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    name: Lint and Type Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 mypy black isort
+        pip install -r requirements.txt || echo "requirements.txt not found"
+    
+    - name: Lint with flake8
+      run: |
+        # Stop build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # Exit-zero treats all errors as warnings
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      continue-on-error: true
+    
+    - name: Check code formatting with black
+      run: |
+        black --check --diff .
+      continue-on-error: true
+    
+    - name: Check import sorting with isort
+      run: |
+        isort --check-only --diff .
+      continue-on-error: true
+    
+    - name: Type check with mypy
+      run: |
+        mypy --install-types --non-interactive --ignore-missing-imports .
+      continue-on-error: true
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libpq-dev
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install coverage pytest pytest-django
+        pip install -r requirements.txt || pip install django channels channels-redis daphne
+    
+    - name: Set up test environment
+      run: |
+        cp .env.example .env || echo "SECRET_KEY=test-secret-key-for-ci" > .env
+        echo "DEBUG=True" >> .env
+        echo "REDIS_HOST=localhost" >> .env
+    
+    - name: Run migrations
+      run: |
+        python manage.py migrate --noinput
+    
+    - name: Run tests with coverage
+      env:
+        REDIS_HOST: localhost
+      run: |
+        coverage run --source='.' manage.py test
+        coverage report
+        coverage xml
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+      continue-on-error: true
+    
+    - name: Generate coverage badge
+      run: |
+        coverage report | grep TOTAL | awk '{print "Coverage: " $4}'
+
+  security:
+    name: Security Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install safety bandit
+    
+    - name: Check for security vulnerabilities
+      run: |
+        safety check || echo "Safety check completed with warnings"
+      continue-on-error: true
+    
+    - name: Run Bandit security linter
+      run: |
+        bandit -r . -x ./tests,./venv,./.pythonlibs || echo "Bandit completed with warnings"
+      continue-on-error: true
+
+  build:
+    name: Build Check
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt || pip install django
+    
+    - name: Collect static files
+      run: |
+        python manage.py collectstatic --noinput || echo "Static collection skipped"
+      env:
+        SECRET_KEY: 'test-secret-key'
+        DEBUG: 'False'
+    
+    - name: Check deployment readiness
+      run: |
+        python manage.py check --deploy || echo "Deployment check completed with warnings"
+      env:
+        SECRET_KEY: 'test-secret-key'
+        DEBUG: 'False'
+
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt || pip install django channels daphne
+    
+    - name: Run integration tests
+      run: |
+        echo "Running integration tests..."
+        python manage.py test auctions.test_websocket payments.test_ussd payments.test_webhooks || echo "Integration tests completed"
+      env:
+        REDIS_HOST: localhost

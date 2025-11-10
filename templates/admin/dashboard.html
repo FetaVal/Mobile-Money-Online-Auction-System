@@ -1,0 +1,266 @@
+{% extends 'admin/base.html' %}
+{% load custom_filters %}
+
+{% block admin_content %}
+<div class="admin-header">
+    <h1>📊 Dashboard Overview</h1>
+    <p>Analytics and key metrics for Auction Hub</p>
+</div>
+
+<!-- Pending Seller Applications Alert -->
+{% if pending_sellers > 0 %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="alert" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left: 5px solid #f59e0b; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <h5 style="color: #92400e; margin: 0; margin-bottom: 8px;">
+                        <i class="fas fa-user-clock"></i> Pending Seller Applications
+                    </h5>
+                    <p style="color: #78350f; margin: 0; font-size: 14px;">
+                        <strong>{{ pending_sellers }}</strong> seller application{{ pending_sellers|pluralize }} waiting for your review and approval.
+                    </p>
+                </div>
+                <div>
+                    <a href="{% url 'admin_seller_applications' %}" class="btn btn-warning" style="font-weight: 600; padding: 10px 24px; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
+                        <i class="fas fa-clipboard-check"></i> Review Applications
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <!-- Users Stats -->
+    <div class="col-md-3 mb-3">
+        <div class="stat-card">
+            <div class="stat-card-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-card-value">{{ total_users|default:0 }}</div>
+            <div class="stat-card-label">Total Users</div>
+            <div class="stat-card-change positive">
+                <i class="fas fa-arrow-up"></i> {{ new_users_30d|default:0 }} new (30 days)
+            </div>
+        </div>
+    </div>
+    
+    <!-- Active Users -->
+    <div class="col-md-3 mb-3">
+        <div class="stat-card">
+            <div class="stat-card-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div class="stat-card-value">{{ active_users|default:0 }}</div>
+            <div class="stat-card-label">Active Now</div>
+            <div class="stat-card-change" style="color: #64748b;">
+                <i class="fas fa-circle" style="color: #10b981; font-size: 8px;"></i> Online users
+            </div>
+        </div>
+    </div>
+    
+    <!-- Total Items -->
+    <div class="col-md-3 mb-3">
+        <div class="stat-card">
+            <div class="stat-card-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+                <i class="fas fa-box"></i>
+            </div>
+            <div class="stat-card-value">{{ total_items|default:0 }}</div>
+            <div class="stat-card-label">Total Items</div>
+            <div class="stat-card-change positive">
+                <i class="fas fa-arrow-up"></i> {{ new_items_30d|default:0 }} new (30 days)
+            </div>
+        </div>
+    </div>
+    
+    <!-- Total Spent -->
+    <div class="col-md-3 mb-3">
+        <div class="stat-card">
+            <div class="stat-card-icon" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); color: white;">
+                <i class="fas fa-shopping-bag"></i>
+            </div>
+            <div class="stat-card-value" style="font-size: 22px;">{{ total_spent|intcomma }}</div>
+            <div class="stat-card-label">Total Spent (UGX)</div>
+            <div class="stat-card-change positive" style="font-size: 12px;">
+                <i class="fas fa-arrow-up"></i> {{ spent_30d|intcomma }} (30 days)
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Platform Revenue Section -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="stat-card" style="border: 2px solid #10b981;">
+            <div class="stat-card-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="stat-card-value" style="color: #10b981; font-size: 22px;">{{ platform_revenue|intcomma }}</div>
+            <div class="stat-card-label" style="font-weight: 600;">Platform Revenue (UGX)</div>
+            <div class="stat-card-change positive" style="font-size: 12px;">
+                <i class="fas fa-arrow-up"></i> {{ revenue_30d|intcomma }} (30 days)
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="content-card" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-left: 4px solid #10b981;">
+            <h6 style="color: #059669; margin-bottom: 10px;"><i class="fas fa-info-circle"></i> About Platform Revenue</h6>
+            <p style="color: #065f46; margin: 0; font-size: 14px;">
+                Platform revenue represents the 5% tax collected from all completed transactions. This fee helps maintain and improve the auction platform, 
+                ensuring secure payments, fraud detection, and a smooth user experience for both buyers and sellers.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Stats Row -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="stat-card">
+            <div class="stat-card-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-card-value">{{ sold_items|default:0 }}</div>
+            <div class="stat-card-label">Items Sold</div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="stat-card">
+            <div class="stat-card-icon" style="background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); color: white;">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <div class="stat-card-value">{{ active_items|default:0 }}</div>
+            <div class="stat-card-label">Active Listings</div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="stat-card">
+            <div class="stat-card-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
+                <i class="fas fa-gavel"></i>
+            </div>
+            <div class="stat-card-value">{{ total_bids|default:0 }}</div>
+            <div class="stat-card-label">Total Bids</div>
+            <div class="stat-card-change" style="color: #64748b;">
+                Avg: {{ avg_bid_amount|floatformat:0|default:0 }} UGX
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="stat-card">
+            <div class="stat-card-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="stat-card-value">{{ unresolved_fraud_alerts|default:0 }}</div>
+            <div class="stat-card-label">Fraud Alerts</div>
+            <div class="stat-card-change {% if high_severity_alerts > 0 %}negative{% else %}positive{% endif %}">
+                <i class="fas fa-exclamation-triangle"></i> {{ high_severity_alerts|default:0 }} high severity
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <!-- Recent Users -->
+    <div class="col-md-4 mb-4">
+        <div class="content-card">
+            <h5><i class="fas fa-user-plus"></i> Recent Users</h5>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in recent_users %}
+                    <tr>
+                        <td style="width: 60%;">
+                            <strong>{{ user.username|truncatechars:15 }}</strong><br>
+                            <small style="color: #64748b;">{{ user.email|truncatechars:25 }}</small>
+                        </td>
+                        <td style="width: 40%; white-space: nowrap;">{{ user.date_joined|date:"M d, Y" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" style="text-align: center; color: #94a3b8;">No recent users</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Recent Items -->
+    <div class="col-md-4 mb-4">
+        <div class="content-card">
+            <h5><i class="fas fa-box"></i> Recent Items</h5>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in recent_items %}
+                    <tr>
+                        <td style="width: 60%;">
+                            <strong>{{ item.title|truncatechars:20 }}</strong><br>
+                            <small style="color: #64748b;">by {{ item.seller.username|truncatechars:12 }}</small>
+                        </td>
+                        <td style="width: 40%;">
+                            <strong style="font-size: 13px;">{{ item.current_price|floatformat:0 }}</strong><br>
+                            <span class="badge badge-{{ item.status }}" style="font-size: 10px;">{{ item.status }}</span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" style="text-align: center; color: #94a3b8;">No recent items</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Recent Payments -->
+    <div class="col-md-4 mb-4">
+        <div class="content-card">
+            <h5><i class="fas fa-credit-card"></i> Recent Payments</h5>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in recent_payments %}
+                    <tr>
+                        <td style="width: 50%;">
+                            <strong>{{ payment.user.username|truncatechars:12 }}</strong><br>
+                            <small style="color: #64748b;">{{ payment.payment_method|truncatechars:10 }}</small>
+                        </td>
+                        <td style="width: 50%;">
+                            <strong style="font-size: 13px;">{{ payment.amount|floatformat:0 }}</strong><br>
+                            <small style="color: #10b981;">✓ Complete</small>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" style="text-align: center; color: #94a3b8;">No recent payments</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

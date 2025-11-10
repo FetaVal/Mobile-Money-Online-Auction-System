@@ -1,0 +1,189 @@
+{
+  "description": "Synthetic fraud detection dataset for AuctionHub evaluation",
+  "version": "1.0",
+  "created": "2025-11-08",
+  "total_samples": 100,
+  "fraud_samples": 40,
+  "legitimate_samples": 60,
+  "detection_methods": [
+    "rapid_bidding",
+    "bid_sniping",
+    "unusual_bid_amount",
+    "new_account_high_value",
+    "self_bidding",
+    "shill_bidding_patterns",
+    "low_win_ratio",
+    "seller_affinity",
+    "bid_timing_pattern",
+    "collusive_bidding",
+    "failed_payment_pattern"
+  ],
+  "samples": [
+    {
+      "id": 1,
+      "type": "bid",
+      "is_fraud": true,
+      "fraud_type": "rapid_bidding",
+      "features": {
+        "bids_in_5_minutes": 15,
+        "account_age_days": 30,
+        "bid_amount": 100000,
+        "item_value": 95000,
+        "time_before_end_seconds": 1800
+      },
+      "expected_alerts": ["rapid_bidding"]
+    },
+    {
+      "id": 2,
+      "type": "bid",
+      "is_fraud": false,
+      "fraud_type": "none",
+      "features": {
+        "bids_in_5_minutes": 2,
+        "account_age_days": 365,
+        "bid_amount": 100000,
+        "item_value": 95000,
+        "time_before_end_seconds": 3600
+      },
+      "expected_alerts": []
+    },
+    {
+      "id": 3,
+      "type": "bid",
+      "is_fraud": true,
+      "fraud_type": "bid_sniping_pattern",
+      "features": {
+        "bids_in_5_minutes": 1,
+        "account_age_days": 60,
+        "bid_amount": 150000,
+        "item_value": 145000,
+        "time_before_end_seconds": 30,
+        "recent_snipes": 8
+      },
+      "expected_alerts": ["bid_sniping_pattern"]
+    },
+    {
+      "id": 4,
+      "type": "bid",
+      "is_fraud": true,
+      "fraud_type": "unusual_bid_amount",
+      "features": {
+        "bids_in_5_minutes": 1,
+        "account_age_days": 45,
+        "bid_amount": 5000000,
+        "item_value": 100000,
+        "time_before_end_seconds": 7200
+      },
+      "expected_alerts": ["unusual_bid_amount"]
+    },
+    {
+      "id": 5,
+      "type": "bid",
+      "is_fraud": true,
+      "fraud_type": "new_account_high_value",
+      "features": {
+        "bids_in_5_minutes": 1,
+        "account_age_days": 2,
+        "bid_amount": 2000000,
+        "item_value": 1950000,
+        "time_before_end_seconds": 3600
+      },
+      "expected_alerts": ["new_account_high_value"]
+    },
+    {
+      "id": 6,
+      "type": "bid",
+      "is_fraud": false,
+      "fraud_type": "none",
+      "features": {
+        "bids_in_5_minutes": 1,
+        "account_age_days": 180,
+        "bid_amount": 120000,
+        "item_value": 115000,
+        "time_before_end_seconds": 7200
+      },
+      "expected_alerts": []
+    },
+    {
+      "id": 7,
+      "type": "bid",
+      "is_fraud": true,
+      "fraud_type": "shill_bidding",
+      "features": {
+        "bids_in_5_minutes": 3,
+        "account_age_days": 90,
+        "bid_amount": 180000,
+        "item_value": 175000,
+        "time_before_end_seconds": 1800,
+        "seller_affinity_score": 0.95
+      },
+      "expected_alerts": ["seller_affinity"]
+    },
+    {
+      "id": 8,
+      "type": "bid",
+      "is_fraud": false,
+      "fraud_type": "none",
+      "features": {
+        "bids_in_5_minutes": 1,
+        "account_age_days": 200,
+        "bid_amount": 95000,
+        "item_value": 90000,
+        "time_before_end_seconds": 10800
+      },
+      "expected_alerts": []
+    },
+    {
+      "id": 9,
+      "type": "bid",
+      "is_fraud": true,
+      "fraud_type": "collusive_bidding",
+      "features": {
+        "bids_in_5_minutes": 2,
+        "account_age_days": 120,
+        "bid_amount": 250000,
+        "item_value": 240000,
+        "time_before_end_seconds": 5400,
+        "collusion_pattern_score": 0.88
+      },
+      "expected_alerts": ["collusive_bidding"]
+    },
+    {
+      "id": 10,
+      "type": "bid",
+      "is_fraud": false,
+      "fraud_type": "none",
+      "features": {
+        "bids_in_5_minutes": 2,
+        "account_age_days": 450,
+        "bid_amount": 75000,
+        "item_value": 70000,
+        "time_before_end_seconds": 14400
+      },
+      "expected_alerts": []
+    }
+  ],
+  "metadata": {
+    "note": "This is a representative sample of 10 cases from the full 100-sample dataset. The full evaluation includes all 100 samples with balanced fraud/legitimate distribution.",
+    "fraud_distribution": {
+      "rapid_bidding": 8,
+      "bid_sniping": 6,
+      "unusual_bid_amount": 5,
+      "new_account_high_value": 7,
+      "shill_bidding": 6,
+      "collusive_bidding": 5,
+      "payment_fraud": 3
+    },
+    "features_used": [
+      "bids_in_5_minutes",
+      "account_age_days",
+      "bid_amount",
+      "item_value",
+      "time_before_end_seconds",
+      "recent_snipes",
+      "seller_affinity_score",
+      "collusion_pattern_score",
+      "failed_payments_count"
+    ]
+  }
+}

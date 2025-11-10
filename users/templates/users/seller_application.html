@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Become a Seller - AuctionHub{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="fas fa-store"></i> Seller Application</h3>
+                    <p class="mb-0 small">Join thousands of successful sellers on AuctionHub</p>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-info-circle"></i> Why Become a Seller?</h5>
+                        <ul class="mb-0">
+                            <li>Reach thousands of potential buyers across Uganda</li>
+                            <li>Professional seller dashboard with detailed analytics</li>
+                            <li>Secure payment processing with mobile money integration</li>
+                            <li>24/7 customer support for sellers</li>
+                            <li>Build your brand and grow your business</li>
+                        </ul>
+                    </div>
+
+                    <h4 class="mt-4 mb-3">Application Requirements</h4>
+                    <p class="text-muted">To ensure the safety and security of our marketplace, we require all sellers to complete this verification form. Your application will be reviewed within 24-48 hours.</p>
+
+                    <form method="post" enctype="multipart/form-data" class="mt-4">
+                        {% csrf_token %}
+                        
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-building"></i> Business Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {{ form.business_name|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.business_type|as_crispy_field }}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {{ form.business_registration_number|as_crispy_field }}
+                                        <small class="text-muted">Optional for individual sellers</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.years_of_experience|as_crispy_field }}
+                                    </div>
+                                </div>
+                                {{ form.business_description|as_crispy_field }}
+                                {{ form.product_categories|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-id-card"></i> Identity Verification</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {{ form.national_id_number|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.phone_number|as_crispy_field }}
+                                    </div>
+                                </div>
+                                
+                                <h6 class="mt-3 mb-3"><i class="fas fa-camera"></i> National ID Photos</h6>
+                                <p class="text-muted small">Please upload clear photos of your National ID card for verification. Make sure all text is readable.</p>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {{ form.national_id_front|as_crispy_field }}
+                                        <div class="mt-2 mb-3">
+                                            <img id="id-front-preview" src="" alt="ID Front Preview" style="max-width: 100%; max-height: 200px; display: none; border: 2px solid #ddd; border-radius: 8px; padding: 5px;">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.national_id_back|as_crispy_field }}
+                                        <div class="mt-2 mb-3">
+                                            <img id="id-back-preview" src="" alt="ID Back Preview" style="max-width: 100%; max-height: 200px; display: none; border: 2px solid #ddd; border-radius: 8px; padding: 5px;">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-warning">
+                                    <small><i class="fas fa-shield-alt"></i> Your personal information is encrypted and will only be used for verification purposes.</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-university"></i> Banking Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted">We need your banking details to process your seller payouts when items are sold.</p>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {{ form.bank_name|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.bank_account_number|as_crispy_field }}
+                                    </div>
+                                </div>
+                                {{ form.bank_account_name|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <div class="alert alert-success">
+                            <h5><i class="fas fa-check-circle"></i> What Happens Next?</h5>
+                            <ol class="mb-0">
+                                <li>Submit your application</li>
+                                <li>Our team reviews your information (24-48 hours)</li>
+                                <li>You'll receive an email notification about your application status</li>
+                                <li>Once approved, you can start listing items immediately!</li>
+                            </ol>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="fas fa-paper-plane"></i> Submit Application
+                            </button>
+                            <a href="{% url 'home' %}" class="btn btn-secondary btn-lg px-5 ml-2">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const idFrontInput = document.querySelector('input[name="national_id_front"]');
+        const idBackInput = document.querySelector('input[name="national_id_back"]');
+        const frontPreview = document.getElementById('id-front-preview');
+        const backPreview = document.getElementById('id-back-preview');
+        
+        if (idFrontInput) {
+            idFrontInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        frontPreview.src = event.target.result;
+                        frontPreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+        
+        if (idBackInput) {
+            idBackInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        backPreview.src = event.target.result;
+                        backPreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
