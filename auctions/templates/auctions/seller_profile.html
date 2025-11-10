@@ -1,0 +1,610 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ seller.username }}'s Profile - AuctionHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding: 40px 0;
+    }
+    
+    .profile-header {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        padding: 60px 0;
+        margin-bottom: 40px;
+        border-radius: 15px;
+    }
+    
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: white;
+        color: #6366f1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        font-weight: 700;
+        margin: 0 auto 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .profile-name {
+        font-size: 36px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .profile-stats {
+        display: flex;
+        gap: 30px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+    }
+    
+    .stat-label {
+        font-size: 14px;
+        opacity: 0.9;
+    }
+    
+    .section-card {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+        margin-bottom: 30px;
+    }
+    
+    .section-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 25px;
+        color: #1a1a2e;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .item-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 25px;
+    }
+    
+    .item-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s;
+        background: white;
+    }
+    
+    .item-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    
+    .item-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        background: #f8f9fa;
+    }
+    
+    .item-content {
+        padding: 15px;
+    }
+    
+    .item-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #1a1a2e;
+    }
+    
+    .item-price {
+        font-size: 20px;
+        font-weight: 700;
+        color: #6366f1;
+    }
+    
+    .review-card {
+        padding: 20px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .review-card:last-child {
+        border-bottom: none;
+    }
+    
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .reviewer-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .reviewer-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+    }
+    
+    .review-stars {
+        color: #fbbf24;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #94a3b8;
+    }
+    
+    .empty-state i {
+        font-size: 64px;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .status-active {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    
+    .status-sold {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="container">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            {% if seller.profile.profile_picture %}
+                <img src="{{ seller.profile.profile_picture.url }}" alt="{{ seller.username }}" class="profile-avatar" style="object-fit: cover; border: 5px solid white;">
+            {% else %}
+                <div class="profile-avatar">
+                    {{ seller.username|slice:":1"|upper }}
+                </div>
+            {% endif %}
+            <h1 class="profile-name text-center">
+                {{ seller.username }}
+                {% if seller.is_superuser %}
+                    <span class="badge ms-2" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; font-size: 16px; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);">
+                        <i class="fas fa-shield-alt"></i> Admin
+                    </span>
+                {% elif seller.profile.seller_status == 'approved' %}
+                    <span class="badge ms-2" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; font-size: 16px; padding: 6px 14px; border-radius: 20px; vertical-align: middle; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+                        <i class="fas fa-check-circle"></i> Verified Seller
+                    </span>
+                {% endif %}
+            </h1>
+            <div class="text-center">
+                {% if seller_rating > 0 %}
+                    <div style="font-size: 24px;">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= seller_rating %}⭐{% else %}☆{% endif %}
+                        {% endfor %}
+                    </div>
+                    <p style="margin-top: 10px; opacity: 0.9;">{{ seller_rating }} out of 5 ({{ seller_review_count }} reviews)</p>
+                {% else %}
+                    <p style="opacity: 0.9;">No ratings yet</p>
+                {% endif %}
+            </div>
+            
+            {% if seller.profile.bio %}
+                <div style="margin: 20px auto; max-width: 600px; padding: 15px 25px; background: rgba(255,255,255,0.2); border-radius: 10px; backdrop-filter: blur(10px);">
+                    <p style="margin: 0; color: white; font-size: 15px; line-height: 1.6; text-align: center;">{{ seller.profile.bio }}</p>
+                </div>
+            {% endif %}
+            
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="followers-count">{{ followers_count }}</div>
+                    <div class="stat-label">Followers</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{ following_count }}</div>
+                    <div class="stat-label">Following</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{ total_items }}</div>
+                    <div class="stat-label">Total Items</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{ active_items.count }}</div>
+                    <div class="stat-label">Active Auctions</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{ sold_items.count }}</div>
+                    <div class="stat-label">Sold Items</div>
+                </div>
+            </div>
+            
+            {% if user.is_authenticated and user != seller %}
+            <div class="text-center" style="margin-top: 30px;">
+                <button id="follow-btn" class="btn btn-lg" style="background: white; color: #6366f1; font-weight: 600; padding: 12px 40px; border: 2px solid white; border-radius: 30px; transition: all 0.3s; margin-right: 15px;">
+                    {% if is_following %}
+                        <i class="fas fa-user-check"></i> Following
+                    {% else %}
+                        <i class="fas fa-user-plus"></i> Follow
+                    {% endif %}
+                </button>
+                <a href="{% url 'start_conversation' seller.id %}" class="btn btn-lg" style="background: #10b981; color: white; font-weight: 600; padding: 12px 40px; border: 2px solid #10b981; border-radius: 30px; transition: all 0.3s; text-decoration: none; margin-right: 15px;">
+                    <i class="fas fa-comments"></i> Chat
+                </a>
+                <button class="btn btn-lg" data-bs-toggle="modal" data-bs-target="#shareProfileModal" data-profile-username="{{ seller.username }}" data-profile-url="{% url 'seller_profile' seller.username %}" style="background: rgba(255,255,255,0.2); color: white; font-weight: 600; padding: 12px 40px; border: 2px solid white; border-radius: 30px; transition: all 0.3s;">
+                    <i class="fas fa-share-alt"></i> Share Profile
+                </button>
+            </div>
+            {% endif %}
+            {% if user.is_authenticated and user == seller %}
+            <div class="text-center" style="margin-top: 30px;">
+                <button class="btn btn-lg" data-bs-toggle="modal" data-bs-target="#shareProfileModal" data-profile-username="{{ seller.username }}" data-profile-url="{% url 'seller_profile' seller.username %}" style="background: white; color: #6366f1; font-weight: 600; padding: 12px 40px; border: 2px solid white; border-radius: 30px; transition: all 0.3s;">
+                    <i class="fas fa-share-alt"></i> Share Profile
+                </button>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Active Items -->
+        {% if active_items %}
+        <div class="section-card">
+            <h2 class="section-title">
+                🔥 Active Auctions
+            </h2>
+            <div class="item-grid">
+                {% for item in active_items %}
+                <a href="{% url 'item_detail' item.pk %}" style="text-decoration: none; color: inherit;">
+                    <div class="item-card">
+                        {% if item.main_image %}
+                            <img src="{{ item.main_image.url }}" alt="{{ item.title }}" class="item-image">
+                        {% else %}
+                            <div class="item-image" style="display: flex; align-items: center; justify-content: center; background: #e2e8f0;">
+                                <i class="fas fa-image fa-3x" style="color: #cbd5e1;"></i>
+                            </div>
+                        {% endif %}
+                        <div class="item-content">
+                            <span class="status-badge status-active">Active</span>
+                            <h3 class="item-title">{{ item.title }}</h3>
+                            <div class="item-price">UGX {{ item.current_price|floatformat:0 }}</div>
+                            <small style="color: #64748b;">{{ item.bid_count }} bids • {{ item.time_remaining }}</small>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Sold Items -->
+        {% if sold_items %}
+        <div class="section-card">
+            <h2 class="section-title">
+                ✅ Sold Items
+            </h2>
+            <div class="item-grid">
+                {% for item in sold_items %}
+                <a href="{% url 'item_detail' item.pk %}" style="text-decoration: none; color: inherit;">
+                    <div class="item-card">
+                        {% if item.main_image %}
+                            <img src="{{ item.main_image.url }}" alt="{{ item.title }}" class="item-image">
+                        {% else %}
+                            <div class="item-image" style="display: flex; align-items: center; justify-content: center; background: #e2e8f0;">
+                                <i class="fas fa-image fa-3x" style="color: #cbd5e1;"></i>
+                            </div>
+                        {% endif %}
+                        <div class="item-content">
+                            <span class="status-badge status-sold">Sold</span>
+                            <h3 class="item-title">{{ item.title }}</h3>
+                            <div class="item-price">UGX {{ item.current_price|floatformat:0 }}</div>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Reviews -->
+        <div class="section-card">
+            <h2 class="section-title">
+                ⭐ Reviews
+            </h2>
+            
+            {% if reviews %}
+                {% for review in reviews %}
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-info">
+                            {% if review.reviewer.profile.profile_picture %}
+                                <img src="{{ review.reviewer.profile.profile_picture.url }}" alt="{{ review.reviewer.username }}" class="reviewer-avatar" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #667eea;">
+                            {% else %}
+                                <div class="reviewer-avatar">
+                                    {{ review.reviewer.username|slice:":1"|upper }}
+                                </div>
+                            {% endif %}
+                            <div>
+                                <strong>{{ review.reviewer.username }}</strong>
+                                <div class="review-stars">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= review.rating %}⭐{% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <small style="color: #94a3b8;">{{ review.created_at|timesince }} ago</small>
+                    </div>
+                    <p style="color: #64748b; margin: 10px 0;">{{ review.comment }}</p>
+                    {% if review.review_image %}
+                        <div style="margin-top: 10px;">
+                            <img src="{{ review.review_image.url }}" alt="Review image" style="max-width: 200px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        </div>
+                    {% endif %}
+                    <small style="color: #94a3b8;">
+                        <i class="fas fa-shopping-bag"></i> From: <a href="{% url 'item_detail' review.item.pk %}">{{ review.item.title }}</a>
+                    </small>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-star"></i>
+                    <p>No reviews yet</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        {% if not active_items and not sold_items %}
+        <div class="empty-state">
+            <i class="fas fa-box-open"></i>
+            <h3>No items listed yet</h3>
+            <p>This seller hasn't listed any items yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Share Profile Modal -->
+<div class="modal fade" id="shareProfileModal" tabindex="-1" aria-labelledby="shareProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 15px; border: none;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; border-radius: 15px 15px 0 0;">
+                <h5 class="modal-title" id="shareProfileModalLabel">
+                    <i class="fas fa-share-alt"></i> Share Profile in Chat
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="padding: 25px;">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Search for a user:</label>
+                    <input type="text" class="form-control" id="userSearchInput" placeholder="Type username...">
+                </div>
+                <div id="userListContainer" style="max-height: 300px; overflow-y: auto;">
+                    <div class="text-center text-muted py-3">
+                        <i class="fas fa-search"></i> Start typing to search for users
+                    </div>
+                </div>
+                <div id="searchSpinner" class="text-center py-3" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Helper function to get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const followBtn = document.getElementById('follow-btn');
+    
+    if (followBtn) {
+        let isFollowing = {{ is_following|lower }};
+        
+        followBtn.addEventListener('click', function() {
+            const url = isFollowing ? 
+                '{% url "unfollow_user" seller.username %}' : 
+                '{% url "follow_user" seller.username %}';
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    isFollowing = data.following;
+                    
+                    if (data.following) {
+                        followBtn.innerHTML = '<i class="fas fa-user-check"></i> Following';
+                        followBtn.style.background = 'rgba(255, 255, 255, 0.2)';
+                    } else {
+                        followBtn.innerHTML = '<i class="fas fa-user-plus"></i> Follow';
+                        followBtn.style.background = 'white';
+                    }
+                    
+                    document.getElementById('followers-count').textContent = data.followers_count;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Something went wrong. Please try again.');
+            });
+        });
+        
+        followBtn.addEventListener('mouseenter', function() {
+            if (isFollowing) {
+                this.innerHTML = '<i class="fas fa-user-times"></i> Unfollow';
+                this.style.background = '#ef4444';
+                this.style.borderColor = '#ef4444';
+            }
+        });
+        
+        followBtn.addEventListener('mouseleave', function() {
+            if (isFollowing) {
+                this.innerHTML = '<i class="fas fa-user-check"></i> Following';
+                this.style.background = 'rgba(255, 255, 255, 0.2)';
+                this.style.borderColor = 'white';
+            }
+        });
+    }
+
+    // Share Profile functionality
+    let searchTimeout;
+    const userSearchInput = document.getElementById('userSearchInput');
+    const userListContainer = document.getElementById('userListContainer');
+    const searchSpinner = document.getElementById('searchSpinner');
+    let profileUsername, profileUrl;
+
+    // Capture profile data when modal opens
+    const shareModal = document.getElementById('shareProfileModal');
+    if (shareModal) {
+        shareModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            profileUsername = button.dataset.profileUsername;
+            profileUrl = window.location.origin + button.dataset.profileUrl;
+            userSearchInput.value = '';
+            userListContainer.innerHTML = '<div class="text-center text-muted py-3"><i class="fas fa-search"></i> Start typing to search for users</div>';
+        });
+    }
+
+    // User search with debounce
+    if (userSearchInput) {
+        userSearchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
+            if (query.length < 2) {
+                userListContainer.innerHTML = '<div class="text-center text-muted py-3"><i class="fas fa-search"></i> Start typing to search for users</div>';
+                return;
+            }
+
+            searchSpinner.style.display = 'block';
+            userListContainer.innerHTML = '';
+
+            searchTimeout = setTimeout(() => {
+                fetch(`/api/search-users/?q=${encodeURIComponent(query)}`, {
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    searchSpinner.style.display = 'none';
+                    if (data.users && data.users.length > 0) {
+                        userListContainer.innerHTML = data.users.map(user => `
+                            <div class="user-item p-3 border-bottom" style="cursor: pointer; transition: background 0.2s;" 
+                                 onmouseover="this.style.background='#f8f9fa'" 
+                                 onmouseout="this.style.background='white'"
+                                 onclick="shareProfile(${user.id}, '${user.username}')">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <strong>${user.username}</strong>
+                                    </div>
+                                    <i class="fas fa-paper-plane text-primary"></i>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        userListContainer.innerHTML = '<div class="text-center text-muted py-3"><i class="fas fa-user-slash"></i> No users found</div>';
+                    }
+                })
+                .catch(error => {
+                    searchSpinner.style.display = 'none';
+                    userListContainer.innerHTML = '<div class="text-center text-danger py-3"><i class="fas fa-exclamation-circle"></i> Error searching users</div>';
+                    console.error('Error:', error);
+                });
+            }, 300);
+        });
+    }
+
+    // Share profile function (made global)
+    window.shareProfile = function(recipientId, recipientUsername) {
+        const profileLink = `Check out ${profileUsername}'s profile: ${profileUrl}`;
+        
+        fetch('/messages/send/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `recipient_id=${recipientId}&content=${encodeURIComponent(profileLink)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('shareProfileModal'));
+                modal.hide();
+                alert(`Profile shared with ${recipientUsername}!`);
+            } else {
+                alert('Error: ' + (data.error || 'Failed to share profile'));
+            }
+        })
+        .catch(error => {
+            alert('Error sharing profile. Please try again.');
+            console.error('Error:', error);
+        });
+    };
+});
+</script>
+{% endblock %}

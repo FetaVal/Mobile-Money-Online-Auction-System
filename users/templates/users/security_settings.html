@@ -1,0 +1,497 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Security Settings{% endblock %}
+
+{% block extra_css %}
+<style>
+    .security-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+    
+    .security-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px;
+        border-radius: 15px 15px 0 0;
+        margin-bottom: 0;
+    }
+    
+    .security-header h1 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: 800;
+    }
+    
+    .security-header p {
+        margin: 10px 0 0;
+        opacity: 0.95;
+    }
+    
+    .security-content {
+        background: white;
+        padding: 40px;
+        border-radius: 0 0 15px 15px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    
+    .security-section {
+        padding: 30px;
+        background: #f8fafc;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s;
+    }
+    
+    .security-section:hover {
+        border-color: #667eea;
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.1);
+    }
+    
+    .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+    
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .section-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: white;
+    }
+    
+    .section-title h3 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+    
+    .status-badge {
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-enabled {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+    
+    .status-disabled {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+    
+    .section-description {
+        color: #64748b;
+        line-height: 1.7;
+        margin-bottom: 20px;
+    }
+    
+    .security-action {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .btn-security {
+        padding: 12px 30px;
+        border-radius: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 14px;
+    }
+    
+    .btn-enable {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .btn-enable:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-disable {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+    
+    .btn-disable:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+    }
+    
+    .btn-configure {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .btn-configure:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-secondary {
+        background: #f1f5f9;
+        color: #475569;
+        border: 2px solid #e2e8f0;
+    }
+    
+    .btn-secondary:hover {
+        background: #e2e8f0;
+    }
+    
+    .backup-codes {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 20px;
+        border: 2px solid #e2e8f0;
+    }
+    
+    .backup-codes h4 {
+        margin: 0 0 15px;
+        color: #1e293b;
+        font-weight: 700;
+    }
+    
+    .codes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .backup-code {
+        background: #f8fafc;
+        padding: 12px;
+        border-radius: 8px;
+        font-family: 'Courier New', monospace;
+        font-weight: 700;
+        text-align: center;
+        border: 2px solid #e2e8f0;
+        color: #1e293b;
+    }
+    
+    .security-info {
+        background: #dbeafe;
+        border-left: 4px solid #3b82f6;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-top: 20px;
+    }
+    
+    .security-info i {
+        color: #3b82f6;
+        margin-right: 10px;
+    }
+    
+    .login-history {
+        margin-top: 30px;
+    }
+    
+    .login-entry {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 15px;
+        background: white;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .login-entry.success {
+        border-left: 4px solid #10b981;
+    }
+    
+    .login-entry.failed {
+        border-left: 4px solid #ef4444;
+    }
+    
+    .login-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+    
+    .login-icon.success {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+    
+    .login-icon.failed {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+    
+    .login-details {
+        flex: 1;
+    }
+    
+    .login-details strong {
+        display: block;
+        margin-bottom: 5px;
+        color: #1e293b;
+    }
+    
+    .login-details small {
+        color: #64748b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="security-container">
+    <div class="security-header">
+        <h1><i class="fas fa-shield-alt"></i> Security Settings</h1>
+        <p>Protect your account with advanced security features</p>
+    </div>
+    
+    <div class="security-content">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} mb-3" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <!-- Two-Factor Authentication Section -->
+        <div class="security-section">
+            <div class="section-header">
+                <div class="section-title">
+                    <div class="section-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <div>
+                        <h3>Two-Factor Authentication</h3>
+                    </div>
+                </div>
+                {% if two_factor and two_factor.enabled %}
+                    <span class="status-badge status-enabled">
+                        <i class="fas fa-check-circle"></i> Enabled
+                    </span>
+                {% else %}
+                    <span class="status-badge status-disabled">
+                        <i class="fas fa-times-circle"></i> Disabled
+                    </span>
+                {% endif %}
+            </div>
+            
+            <p class="section-description">
+                Add an extra layer of security to your account. When enabled, you'll need to enter a verification code in addition to your password when logging in.
+            </p>
+            
+            <div class="security-action">
+                {% if two_factor and two_factor.enabled %}
+                    <form method="post" action="{% url 'disable_2fa' %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-security btn-disable" onclick="return confirm('Are you sure you want to disable two-factor authentication? This will make your account less secure.');">
+                            <i class="fas fa-times"></i> Disable 2FA
+                        </button>
+                    </form>
+                    
+                    {% if two_factor.method == 'totp' %}
+                        <a href="{% url 'setup_totp' %}" class="btn-security btn-secondary">
+                            <i class="fas fa-qrcode"></i> View QR Code
+                        </a>
+                    {% endif %}
+                    
+                    <button type="button" class="btn-security btn-secondary" onclick="toggleBackupCodes()">
+                        <i class="fas fa-key"></i> Backup Codes
+                    </button>
+                {% else %}
+                    <a href="{% url 'enable_2fa_email' %}" class="btn-security btn-enable">
+                        <i class="fas fa-envelope"></i> Enable Email 2FA
+                    </a>
+                    <a href="{% url 'setup_totp' %}" class="btn-security btn-configure">
+                        <i class="fas fa-mobile-alt"></i> Enable Authenticator App
+                    </a>
+                {% endif %}
+            </div>
+            
+            {% if two_factor and two_factor.enabled %}
+                <!-- Inline Backup Codes Display -->
+                <div id="backupCodesContainer" class="backup-codes" style="display: none;">
+                    <h4><i class="fas fa-key"></i> Backup Recovery Codes</h4>
+                    <div class="alert alert-warning" style="margin-bottom: 15px;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Important:</strong> Save these codes in a secure location. Each code can only be used once.
+                    </div>
+                    
+                    {% if backup_codes %}
+                        <div class="codes-grid">
+                            {% for code in backup_codes %}
+                                <div class="backup-code">{{ code }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <button type="button" class="btn-security btn-configure" style="width: 100%; margin-top: 10px;" onclick="downloadBackupCodes()">
+                            <i class="fas fa-download"></i> Download Codes
+                        </button>
+                    {% else %}
+                        <p style="text-align: center; color: #64748b; margin: 10px 0;">No backup codes available.</p>
+                        <form method="post" action="{% url 'generate_backup_codes' %}" style="margin-top: 10px;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-security btn-configure" style="width: 100%;">
+                                <i class="fas fa-plus"></i> Generate Backup Codes
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+                
+                <div class="security-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Current Method:</strong> 
+                    {% if two_factor.method == 'email' %}
+                        Email OTP (codes sent to {{ user.email }})
+                    {% elif two_factor.method == 'totp' %}
+                        Authenticator App (Google Authenticator, Authy, etc.)
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Password Security Section -->
+        <div class="security-section">
+            <div class="section-header">
+                <div class="section-title">
+                    <div class="section-icon">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <div>
+                        <h3>Password Security</h3>
+                    </div>
+                </div>
+                <span class="status-badge status-enabled">
+                    <i class="fas fa-shield-alt"></i> PBKDF2 600k
+                </span>
+            </div>
+            
+            <p class="section-description">
+                Your password is protected with PBKDF2 hashing using 600,000 iterations, exceeding NIST security standards.
+            </p>
+            
+            <div class="security-action">
+                <a href="{% url 'change_password' %}" class="btn-security btn-configure">
+                    <i class="fas fa-edit"></i> Change Password
+                </a>
+            </div>
+            
+            <div class="security-info">
+                <i class="fas fa-check-circle"></i>
+                Your password meets enterprise-grade security requirements
+            </div>
+        </div>
+        
+        <!-- Login History Section -->
+        {% if login_attempts %}
+        <div class="security-section">
+            <div class="section-header">
+                <div class="section-title">
+                    <div class="section-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div>
+                        <h3>Recent Login Activity</h3>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="section-description">
+                Monitor your account activity and detect any unauthorized access attempts.
+            </p>
+            
+            <div class="login-history">
+                {% for attempt in login_attempts %}
+                    <div class="login-entry {% if attempt.success %}success{% else %}failed{% endif %}">
+                        <div class="login-icon {% if attempt.success %}success{% else %}failed{% endif %}">
+                            {% if attempt.success %}
+                                <i class="fas fa-check"></i>
+                            {% else %}
+                                <i class="fas fa-times"></i>
+                            {% endif %}
+                        </div>
+                        <div class="login-details">
+                            <strong>
+                                {% if attempt.success %}
+                                    Successful Login
+                                {% else %}
+                                    Failed Login Attempt
+                                {% endif %}
+                            </strong>
+                            <small>
+                                <i class="fas fa-clock"></i> {{ attempt.timestamp|date:"M d, Y - g:i A" }}
+                                <span style="margin: 0 10px;">|</span>
+                                <i class="fas fa-map-marker-alt"></i> {{ attempt.ip_address }}
+                                {% if not attempt.success and attempt.failure_reason %}
+                                    <span style="margin: 0 10px;">|</span>
+                                    <i class="fas fa-exclamation-circle"></i> {{ attempt.failure_reason }}
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function toggleBackupCodes() {
+    const container = document.getElementById('backupCodesContainer');
+    if (container.style.display === 'none') {
+        container.style.display = 'block';
+        // Smooth scroll to the backup codes
+        container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+        container.style.display = 'none';
+    }
+}
+
+function downloadBackupCodes() {
+    const codes = [{% for code in backup_codes %}'{{ code }}',{% endfor %}];
+    const text = 'AuctionHub Backup Recovery Codes\n\n' + codes.join('\n') + '\n\nKeep these codes safe!';
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'auctionhub-backup-codes.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+</script>
+{% endblock %}

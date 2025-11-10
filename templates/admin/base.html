@@ -1,0 +1,343 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - Auction Hub{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: #f8f9fa;
+    }
+    
+    .admin-wrapper {
+        display: flex;
+        min-height: 100vh;
+        padding-top: 76px;
+    }
+    
+    .admin-sidebar {
+        width: 260px;
+        background: #1e293b;
+        color: white;
+        position: fixed;
+        left: 0;
+        top: 76px;
+        bottom: 0;
+        overflow-y: auto;
+        z-index: 100;
+    }
+    
+    .admin-sidebar-header {
+        padding: 24px 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .admin-sidebar-header h4 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #f1f5f9;
+    }
+    
+    .admin-sidebar-header p {
+        margin: 4px 0 0 0;
+        font-size: 13px;
+        color: #94a3b8;
+    }
+    
+    .admin-nav {
+        padding: 16px 0;
+    }
+    
+    .admin-nav-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        color: #cbd5e1;
+        text-decoration: none;
+        transition: all 0.3s;
+        border-left: 3px solid transparent;
+    }
+    
+    .admin-nav-item:hover {
+        background: rgba(255,255,255,0.05);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .admin-nav-item.active {
+        background: rgba(99,102,241,0.1);
+        color: #818cf8;
+        border-left-color: #6366f1;
+    }
+    
+    .admin-nav-item i {
+        width: 24px;
+        margin-right: 12px;
+        font-size: 16px;
+    }
+    
+    .admin-content {
+        flex: 1;
+        margin-left: 260px;
+        padding: 30px;
+    }
+    
+    .admin-header {
+        background: white;
+        border-radius: 12px;
+        padding: 24px 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .admin-header h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+    
+    .admin-header p {
+        margin: 6px 0 0 0;
+        color: #64748b;
+        font-size: 15px;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        transition: all 0.3s;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .stat-card-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        margin-bottom: 16px;
+    }
+    
+    .stat-card-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 6px;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        line-height: 1.2;
+    }
+    
+    .stat-card-label {
+        color: #64748b;
+        font-size: 14px;
+        margin-bottom: 12px;
+    }
+    
+    .stat-card-change {
+        font-size: 13px;
+        font-weight: 600;
+    }
+    
+    .stat-card-change.positive {
+        color: #10b981;
+    }
+    
+    .stat-card-change.negative {
+        color: #ef4444;
+    }
+    
+    .content-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .content-card h5 {
+        margin: 0 0 20px 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+    
+    .data-table thead {
+        background: #f8fafc;
+    }
+    
+    .data-table th {
+        padding: 12px 12px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 12px;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    
+    .data-table td {
+        padding: 12px 12px;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 13px;
+        color: #334155;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        max-width: 0;
+    }
+    
+    .data-table td small {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 100%;
+    }
+    
+    .data-table td strong {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    /* Fix for Bootstrap tables in card bodies */
+    .card-body .table td,
+    .card-body .table th {
+        padding: 0.75rem;
+        vertical-align: middle;
+    }
+    
+    .card-body .table td a {
+        display: inline-block;
+        width: 100%;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .data-table tbody tr:hover {
+        background: #f8fafc;
+    }
+    
+    .badge {
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .badge-success {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    
+    .badge-warning {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    
+    .badge-danger {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    
+    .badge-info {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+    
+    .badge-secondary {
+        background: #e2e8f0;
+        color: #475569;
+    }
+    
+    .search-filter-bar {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .search-filter-bar .form-control {
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        padding: 10px 16px;
+    }
+    
+    .search-filter-bar .btn {
+        border-radius: 8px;
+        padding: 10px 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-wrapper">
+    <!-- Sidebar -->
+    <div class="admin-sidebar">
+        <div class="admin-sidebar-header">
+            <h4>⚙️ Admin Panel</h4>
+            <p>{{ user.username }}</p>
+        </div>
+        
+        <nav class="admin-nav">
+            <a href="{% url 'admin_dashboard' %}" class="admin-nav-item {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{% url 'admin_users' %}" class="admin-nav-item {% if request.resolver_match.url_name == 'admin_users' %}active{% endif %}">
+                <i class="fas fa-users"></i>
+                <span>Users</span>
+            </a>
+            <a href="{% url 'admin_items' %}" class="admin-nav-item {% if request.resolver_match.url_name == 'admin_items' %}active{% endif %}">
+                <i class="fas fa-box"></i>
+                <span>Items</span>
+            </a>
+            <a href="{% url 'admin_payments' %}" class="admin-nav-item {% if request.resolver_match.url_name == 'admin_payments' %}active{% endif %}">
+                <i class="fas fa-credit-card"></i>
+                <span>Payments</span>
+            </a>
+            <a href="{% url 'admin_fraud_alerts' %}" class="admin-nav-item {% if request.resolver_match.url_name == 'admin_fraud_alerts' %}active{% endif %}">
+                <i class="fas fa-shield-alt"></i>
+                <span>Fraud Alerts</span>
+            </a>
+            <hr style="border-color: rgba(255,255,255,0.1); margin: 16px 0;">
+            <a href="{% url 'home' %}" class="admin-nav-item">
+                <i class="fas fa-home"></i>
+                <span>Back to Site</span>
+            </a>
+        </nav>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="admin-content">
+        {% block admin_content %}
+        {% endblock %}
+    </div>
+</div>
+{% endblock %}

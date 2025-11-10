@@ -1,0 +1,447 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}USSD Simulator - AuctionHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .simulator-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 40px 0;
+    }
+    
+    .simulator-header {
+        text-align: center;
+        color: white;
+        margin-bottom: 40px;
+    }
+    
+    .simulator-header h1 {
+        font-size: 36px;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+    
+    .simulator-header p {
+        font-size: 18px;
+        opacity: 0.9;
+    }
+    
+    .phone-container {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    
+    .phone {
+        background: #1a1a1a;
+        border-radius: 40px;
+        padding: 15px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        position: relative;
+    }
+    
+    .phone-notch {
+        background: #1a1a1a;
+        height: 30px;
+        width: 150px;
+        margin: 0 auto;
+        border-radius: 0 0 20px 20px;
+        position: relative;
+        z-index: 10;
+    }
+    
+    .phone-screen {
+        background: #f5f5f5;
+        border-radius: 25px;
+        overflow: hidden;
+        margin-top: -15px;
+    }
+    
+    .status-bar {
+        background: #000;
+        color: white;
+        padding: 8px 15px;
+        font-size: 12px;
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .ussd-header {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        padding: 15px;
+        text-align: center;
+        font-weight: 600;
+    }
+    
+    .ussd-screen {
+        background: white;
+        min-height: 450px;
+        padding: 20px;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        line-height: 1.6;
+        white-space: pre-wrap;
+    }
+    
+    .ussd-input-area {
+        background: #f8f9fa;
+        padding: 15px;
+        border-top: 2px solid #e2e8f0;
+    }
+    
+    .ussd-input {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 16px;
+        font-family: 'Courier New', monospace;
+    }
+    
+    .ussd-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    
+    .ussd-btn {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .btn-send {
+        background: #10b981;
+        color: white;
+    }
+    
+    .btn-send:hover {
+        background: #059669;
+        transform: translateY(-2px);
+    }
+    
+    .btn-back {
+        background: #ef4444;
+        color: white;
+    }
+    
+    .btn-back:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+    }
+    
+    .network-selector {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .network-option {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .network-option:hover {
+        border-color: #6366f1;
+        background: #f8f9fa;
+    }
+    
+    .network-option.selected {
+        border-color: #6366f1;
+        background: #ede9fe;
+    }
+    
+    .network-logo {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: 700;
+        margin-right: 15px;
+    }
+    
+    .mtn-logo {
+        background: #ffcc00;
+        color: #000;
+    }
+    
+    .airtel-logo {
+        background: #ed1c24;
+        color: white;
+    }
+    
+    .start-btn {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .start-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+    }
+    
+    .start-btn:disabled {
+        background: #cbd5e1;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .info-box {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-top: 30px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .info-box h3 {
+        color: #1a1a2e;
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+    
+    .info-box ul {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .info-box li {
+        padding: 8px 0;
+        color: #64748b;
+    }
+    
+    .info-box li:before {
+        content: "✅ ";
+        margin-right: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="simulator-container">
+    <div class="container">
+        <div class="simulator-header">
+            <h1>📱 USSD Simulator</h1>
+            <p>Experience offline bidding with Mobile Money</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="network-selector" id="networkSelector">
+                    <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 20px; color: #1a1a2e;">Select Your Network</h3>
+                    
+                    <div class="network-option selected" data-network="mtn" onclick="selectNetwork('mtn')">
+                        <div class="network-logo mtn-logo">MTN</div>
+                        <div>
+                            <div style="font-weight: 600; font-size: 16px;">MTN Mobile Money</div>
+                            <div style="color: #64748b; font-size: 14px;">Dial *354# to start</div>
+                        </div>
+                    </div>
+                    
+                    <div class="network-option" data-network="airtel" onclick="selectNetwork('airtel')">
+                        <div class="network-logo airtel-logo">Airtel</div>
+                        <div>
+                            <div style="font-weight: 600; font-size: 16px;">Airtel Money</div>
+                            <div style="color: #64748b; font-size: 14px;">Dial *789# to start</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <label style="font-weight: 600; margin-bottom: 8px; display: block;">Phone Number</label>
+                        <input type="tel" id="phoneNumber" class="ussd-input" placeholder="e.g., 0771234567" required>
+                    </div>
+                    
+                    <button class="start-btn" onclick="startUSSD()">
+                        🚀 Start USSD Session
+                    </button>
+                </div>
+                
+                <div class="info-box">
+                    <h3>How It Works</h3>
+                    <ul>
+                        <li>Select your mobile money network (MTN or Airtel)</li>
+                        <li>Enter your phone number</li>
+                        <li>Browse auction items on the USSD menu</li>
+                        <li>Enter your bid amount</li>
+                        <li>Confirm with your mobile money PIN</li>
+                        <li>Receive SMS confirmation instantly</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="phone-container" id="phoneContainer" style="display: none;">
+                    <div class="phone">
+                        <div class="phone-notch"></div>
+                        <div class="phone-screen">
+                            <div class="status-bar">
+                                <span id="networkName">MTN</span>
+                                <span>⚡ 100%</span>
+                            </div>
+                            <div class="ussd-header" id="ussdHeader">
+                                *354#
+                            </div>
+                            <div class="ussd-screen" id="ussdScreen">
+                                Welcome to AuctionHub USSD!
+                                
+                                Initializing...
+                            </div>
+                            <div class="ussd-input-area">
+                                <input type="text" class="ussd-input" id="ussdInput" placeholder="Enter your choice..." autocomplete="off">
+                                <div class="ussd-buttons">
+                                    <button class="ussd-btn btn-send" onclick="sendUSSDInput()">Send</button>
+                                    <button class="ussd-btn btn-back" onclick="sendBackCommand()">Back (0)</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedNetwork = 'mtn';
+let sessionId = null;
+
+function selectNetwork(network) {
+    selectedNetwork = network;
+    document.querySelectorAll('.network-option').forEach(opt => {
+        opt.classList.remove('selected');
+    });
+    document.querySelector(`[data-network="${network}"]`).classList.add('selected');
+}
+
+async function startUSSD() {
+    const phoneNumber = document.getElementById('phoneNumber').value.trim();
+    
+    if (!phoneNumber) {
+        alert('Please enter your phone number');
+        return;
+    }
+    
+    document.getElementById('networkSelector').style.display = 'none';
+    document.getElementById('phoneContainer').style.display = 'block';
+    
+    const networkName = selectedNetwork === 'mtn' ? 'MTN' : 'Airtel';
+    const ussdCode = selectedNetwork === 'mtn' ? '*354#' : '*789#';
+    
+    document.getElementById('networkName').textContent = networkName;
+    document.getElementById('ussdHeader').textContent = ussdCode;
+    document.getElementById('ussdScreen').textContent = `Connecting to ${networkName}...\n\nPlease wait...`;
+    
+    try {
+        const formData = new FormData();
+        formData.append('phone_number', phoneNumber);
+        formData.append('network', selectedNetwork);
+        
+        const response = await fetch('{% url "ussd_initiate" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            document.getElementById('ussdScreen').textContent = `Error: ${data.error}`;
+            return;
+        }
+        
+        sessionId = data.session_id;
+        document.getElementById('ussdScreen').textContent = data.message;
+        document.getElementById('ussdInput').focus();
+        
+    } catch (error) {
+        document.getElementById('ussdScreen').textContent = `Connection Error:\n${error.message}`;
+    }
+}
+
+async function sendUSSDInput() {
+    const input = document.getElementById('ussdInput').value.trim();
+    
+    if (!input || !sessionId) {
+        return;
+    }
+    
+    document.getElementById('ussdScreen').textContent = 'Processing...';
+    document.getElementById('ussdInput').value = '';
+    
+    try {
+        const formData = new FormData();
+        formData.append('session_id', sessionId);
+        formData.append('input', input);
+        
+        const response = await fetch('{% url "ussd_respond" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            document.getElementById('ussdScreen').textContent = `Error: ${data.error}`;
+            return;
+        }
+        
+        document.getElementById('ussdScreen').textContent = data.message;
+        
+        if (data.end_session) {
+            setTimeout(() => {
+                if (confirm('Session ended. Start a new session?')) {
+                    location.reload();
+                }
+            }, 3000);
+        } else {
+            document.getElementById('ussdInput').focus();
+        }
+        
+    } catch (error) {
+        document.getElementById('ussdScreen').textContent = `Error:\n${error.message}`;
+    }
+}
+
+function sendBackCommand() {
+    document.getElementById('ussdInput').value = '0';
+    sendUSSDInput();
+}
+
+document.getElementById('ussdInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        sendUSSDInput();
+    }
+});
+</script>
+{% endblock %}

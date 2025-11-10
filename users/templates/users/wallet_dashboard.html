@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% block title %}My Wallet - AuctionHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .wallet-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+    
+    .wallet-balance {
+        font-size: 3rem;
+        font-weight: 700;
+        margin: 1rem 0;
+    }
+    
+    .wallet-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .action-btn {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 10px;
+        border: 2px solid white;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        transition: all 0.3s;
+    }
+    
+    .action-btn:hover {
+        background: white;
+        color: #667eea;
+        transform: translateY(-2px);
+    }
+    
+    .transaction-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border: 2px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s;
+    }
+    
+    .transaction-card:hover {
+        border-color: #667eea;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+    }
+    
+    .transaction-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-right: 1rem;
+    }
+    
+    .deposit-icon {
+        background: #d1fae5;
+        color: #059669;
+    }
+    
+    .withdrawal-icon {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+    
+    .sale-icon {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+    
+    .transaction-amount-positive {
+        color: #059669;
+        font-weight: 700;
+        font-size: 1.3rem;
+    }
+    
+    .transaction-amount-negative {
+        color: #dc2626;
+        font-weight: 700;
+        font-size: 1.3rem;
+    }
+    
+    .empty-transactions {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #94a3b8;
+    }
+    
+    .empty-transactions i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: #cbd5e1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 style="color: #667eea; font-weight: 700; margin-bottom: 2rem;">
+        <i class="fas fa-wallet"></i> My Wallet
+    </h1>
+    
+    <div class="wallet-header">
+        <div style="font-size: 1.2rem; opacity: 0.9;">Available Balance</div>
+        <div class="wallet-balance">UGX {{ wallet.balance|floatformat:0 }}</div>
+        <div style="opacity: 0.8; margin-top: 0.5rem;">
+            {% if wallet.is_locked %}
+                <i class="fas fa-lock"></i> Wallet Locked
+            {% else %}
+                <i class="fas fa-check-circle"></i> Wallet Active
+            {% endif %}
+        </div>
+        
+        <div class="wallet-actions">
+            <a href="{% url 'wallet_deposit' %}" class="action-btn">
+                <i class="fas fa-plus-circle"></i> Deposit Funds
+            </a>
+            <a href="{% url 'wallet_withdraw' %}" class="action-btn">
+                <i class="fas fa-arrow-circle-down"></i> Withdraw Funds
+            </a>
+        </div>
+    </div>
+    
+    <div style="background: white; border-radius: 15px; padding: 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+        <h3 style="color: #334155; margin-bottom: 1.5rem; font-weight: 600;">
+            <i class="fas fa-history"></i> Transaction History
+        </h3>
+        
+        {% if transactions %}
+            {% for transaction in transactions %}
+                <div class="transaction-card">
+                    <div style="display: flex; align-items: center;">
+                        <div class="transaction-icon {% if transaction.transaction_type == 'deposit' or transaction.transaction_type == 'sale' or transaction.transaction_type == 'refund' %}deposit-icon{% else %}withdrawal-icon{% endif %}">
+                            {% if transaction.transaction_type == 'deposit' %}
+                                <i class="fas fa-arrow-down"></i>
+                            {% elif transaction.transaction_type == 'withdrawal' %}
+                                <i class="fas fa-arrow-up"></i>
+                            {% elif transaction.transaction_type == 'sale' %}
+                                <i class="fas fa-shopping-bag"></i>
+                            {% elif transaction.transaction_type == 'payment' %}
+                                <i class="fas fa-shopping-cart"></i>
+                            {% else %}
+                                <i class="fas fa-undo"></i>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; color: #334155;">
+                                {{ transaction.get_transaction_type_display }}
+                            </div>
+                            <div style="color: #64748b; font-size: 0.9rem;">
+                                {{ transaction.description }}
+                            </div>
+                            <div style="color: #94a3b8; font-size: 0.85rem; margin-top: 0.3rem;">
+                                {{ transaction.created_at|date:"M d, Y - H:i" }}
+                                {% if transaction.payment_method %}
+                                    • {{ transaction.payment_method|upper }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="{% if transaction.transaction_type == 'deposit' or transaction.transaction_type == 'sale' or transaction.transaction_type == 'refund' %}transaction-amount-positive{% else %}transaction-amount-negative{% endif %}">
+                            {% if transaction.transaction_type == 'deposit' or transaction.transaction_type == 'sale' or transaction.transaction_type == 'refund' %}+{% else %}-{% endif %}UGX {{ transaction.amount|floatformat:0 }}
+                        </div>
+                        <div style="color: #94a3b8; font-size: 0.9rem; margin-top: 0.3rem;">
+                            Balance: UGX {{ transaction.balance_after|floatformat:0 }}
+                        </div>
+                        <span class="badge bg-{{ transaction.status }}" style="margin-top: 0.5rem;">
+                            {{ transaction.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-transactions">
+                <i class="fas fa-receipt"></i>
+                <h4 style="color: #64748b;">No transactions yet</h4>
+                <p>Your transaction history will appear here</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

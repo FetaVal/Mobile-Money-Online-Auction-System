@@ -1,0 +1,21 @@
+[project]
+name = "repl-nix-workspace"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.11"
+dependencies = [
+    "channels>=4.3.1",
+    "channels-redis>=4.3.0",
+    "crispy-bootstrap4>=2025.6",
+    "daphne>=4.2.1",
+    "django>=5.2.8",
+    "django-crispy-forms>=2.5",
+    "django-cron>=0.6.0",
+    "openai>=2.7.1",
+    "paypalrestsdk>=1.13.3",
+    "pillow>=12.0.0",
+    "pymysql>=1.1.2",
+    "python-decouple>=3.8",
+    "redis>=7.0.1",
+    "stripe>=13.2.0",
+]

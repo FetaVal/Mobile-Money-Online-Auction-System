@@ -1,0 +1,334 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Payment - AuctionHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .payment-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .payment-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .payment-header h2 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .payment-header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .payment-body {
+            padding: 40px 30px;
+        }
+
+        .amount-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .amount-label {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .amount-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #212529;
+            margin: 0;
+        }
+
+        .tax-breakdown {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 10px;
+        }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            padding: 12px 16px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            outline: none;
+        }
+
+        .card-input-group {
+            position: relative;
+        }
+
+        .card-brand-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 24px;
+            color: #cbd5e0;
+        }
+
+        .expiry-cvv-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .security-badges {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .security-badges i {
+            color: #28a745;
+            margin-right: 5px;
+        }
+
+        .btn-pay {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .btn-pay:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-pay:active {
+            transform: translateY(0);
+        }
+
+        .btn-cancel {
+            width: 100%;
+            padding: 12px;
+            font-size: 14px;
+            color: #6c757d;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancel:hover {
+            background: #f8f9fa;
+        }
+
+        .accepted-cards {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .accepted-cards i {
+            font-size: 32px;
+            opacity: 0.6;
+        }
+
+        .fa-cc-visa { color: #1A1F71; }
+        .fa-cc-mastercard { color: #EB001B; }
+        .fa-cc-amex { color: #006FCF; }
+        .fa-cc-discover { color: #FF6000; }
+    </style>
+</head>
+<body>
+    <div class="payment-container">
+        <div class="payment-header">
+            <h2><i class="fas fa-credit-card"></i> Secure Card Payment</h2>
+            <p>{{ payment_type|default:"Payment" }} - AuctionHub</p>
+        </div>
+
+        <div class="payment-body">
+            <div class="amount-section">
+                <div class="amount-label">Total Amount Due</div>
+                <div class="amount-value">UGX {{ total_amount|floatformat:0|default:"0" }}</div>
+                <div class="tax-breakdown">
+                    Amount: UGX {{ base_amount|floatformat:0|default:"0" }} + Tax (5%): UGX {{ tax_amount|floatformat:0|default:"0" }}
+                </div>
+            </div>
+
+            <form method="POST" action="{% url 'process_card_payment' %}" id="cardPaymentForm">
+                {% csrf_token %}
+                <input type="hidden" name="payment_id" value="{{ payment_id }}">
+                <input type="hidden" name="return_url" value="{{ return_url }}">
+                <input type="hidden" name="payment_context" value="{{ payment_context }}">
+
+                <div class="mb-3">
+                    <label for="cardholderName" class="form-label">Cardholder Name</label>
+                    <input type="text" class="form-control" id="cardholderName" name="cardholder_name" 
+                           placeholder="John Doe" required pattern="[A-Za-z\s]+" maxlength="50">
+                </div>
+
+                <div class="mb-3 card-input-group">
+                    <label for="cardNumber" class="form-label">Card Number</label>
+                    <input type="text" class="form-control" id="cardNumber" name="card_number" 
+                           placeholder="1234 5678 9012 3456" required 
+                           maxlength="19" inputmode="numeric">
+                    <i class="fas fa-credit-card card-brand-icon" id="cardBrandIcon"></i>
+                </div>
+
+                <div class="expiry-cvv-row mb-3">
+                    <div>
+                        <label for="expiryDate" class="form-label">Expiry Date</label>
+                        <input type="text" class="form-control" id="expiryDate" name="expiry_date" 
+                               placeholder="MM/YY" required maxlength="5" inputmode="numeric">
+                    </div>
+                    <div>
+                        <label for="cvv" class="form-label">CVV</label>
+                        <input type="text" class="form-control" id="cvv" name="cvv" 
+                               placeholder="123" required maxlength="4" inputmode="numeric">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="billingZip" class="form-label">Billing Postal Code</label>
+                    <input type="text" class="form-control" id="billingZip" name="billing_zip" 
+                           placeholder="12345" required maxlength="10">
+                </div>
+
+                <div class="security-badges">
+                    <span><i class="fas fa-lock"></i> 256-bit SSL Encrypted</span>
+                    <span><i class="fas fa-shield-alt"></i> Secure Payment</span>
+                </div>
+
+                <button type="submit" class="btn-pay">
+                    <i class="fas fa-lock"></i> Pay UGX {{ total_amount|floatformat:0|default:"0" }}
+                </button>
+
+                <a href="{{ cancel_url }}" class="btn btn-cancel text-decoration-none">
+                    Cancel Payment
+                </a>
+            </form>
+
+            <div class="accepted-cards">
+                <i class="fab fa-cc-visa"></i>
+                <i class="fab fa-cc-mastercard"></i>
+                <i class="fab fa-cc-amex"></i>
+                <i class="fab fa-cc-discover"></i>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Card number formatting
+        document.getElementById('cardNumber').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s/g, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            e.target.value = formattedValue;
+            
+            // Detect card brand
+            const brandIcon = document.getElementById('cardBrandIcon');
+            if (value.startsWith('4')) {
+                brandIcon.className = 'fab fa-cc-visa card-brand-icon';
+            } else if (value.startsWith('5')) {
+                brandIcon.className = 'fab fa-cc-mastercard card-brand-icon';
+            } else if (value.startsWith('3')) {
+                brandIcon.className = 'fab fa-cc-amex card-brand-icon';
+            } else if (value.startsWith('6')) {
+                brandIcon.className = 'fab fa-cc-discover card-brand-icon';
+            } else {
+                brandIcon.className = 'fas fa-credit-card card-brand-icon';
+            }
+        });
+
+        // Expiry date formatting
+        document.getElementById('expiryDate').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.slice(0, 2) + '/' + value.slice(2, 4);
+            }
+            e.target.value = value;
+        });
+
+        // CVV validation
+        document.getElementById('cvv').addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+
+        // Form validation
+        document.getElementById('cardPaymentForm').addEventListener('submit', function(e) {
+            const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+            if (cardNumber.length < 13 || cardNumber.length > 19) {
+                e.preventDefault();
+                alert('Please enter a valid card number');
+                return false;
+            }
+
+            const expiry = document.getElementById('expiryDate').value;
+            if (!/^\d{2}\/\d{2}$/.test(expiry)) {
+                e.preventDefault();
+                alert('Please enter a valid expiry date (MM/YY)');
+                return false;
+            }
+
+            const cvv = document.getElementById('cvv').value;
+            if (cvv.length < 3 || cvv.length > 4) {
+                e.preventDefault();
+                alert('Please enter a valid CVV');
+                return false;
+            }
+        });
+    </script>
+</body>
+</html>

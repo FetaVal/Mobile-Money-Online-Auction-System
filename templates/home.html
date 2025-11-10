@@ -1,0 +1,823 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.8.1/nouislider.min.css">
+<style>
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .hero-section {
+        position: relative;
+        background: linear-gradient(-45deg, #a8b7f5, #c4a9de, #f8c9fb, #a3d9ff);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        padding: 100px 0 80px;
+        margin-bottom: 40px;
+        overflow: hidden;
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.12);
+        z-index: 1;
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .floating-shapes {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: 1;
+    }
+    
+    .shape {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 50%;
+    }
+    
+    .shape1 {
+        width: 250px;
+        height: 250px;
+        top: 10%;
+        left: 10%;
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    .shape2 {
+        width: 180px;
+        height: 180px;
+        top: 60%;
+        right: 15%;
+        animation: float 8s ease-in-out infinite;
+        animation-delay: 1s;
+    }
+    
+    .shape3 {
+        width: 120px;
+        height: 120px;
+        bottom: 20%;
+        left: 20%;
+        animation: float 7s ease-in-out infinite;
+        animation-delay: 2s;
+    }
+    
+    .hero-section h1 {
+        font-size: 4rem;
+        font-weight: 900;
+        color: #ffffff;
+        margin-bottom: 20px;
+        text-shadow: 2px 4px 8px rgba(0, 0, 0, 0.3);
+        animation: fadeInUp 1s ease-out;
+    }
+    
+    .hero-section .tagline {
+        font-size: 1.3rem;
+        color: #ffffff;
+        margin-bottom: 35px;
+        line-height: 1.8;
+        text-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
+        animation: fadeInUp 1s ease-out 0.2s backwards;
+    }
+    
+    .hero-buttons {
+        animation: fadeInUp 1s ease-out 0.4s backwards;
+    }
+    
+    .hero-buttons .btn {
+        padding: 18px 45px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        border-radius: 50px;
+        margin: 0 10px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn-primary-hero {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        border: none;
+        color: white;
+    }
+    
+    .btn-primary-hero:hover {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 15px 40px rgba(245, 87, 108, 0.5);
+    }
+    
+    .btn-secondary-hero {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: white;
+    }
+    
+    .btn-secondary-hero:hover {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.5);
+        color: white;
+        transform: translateY(-5px) scale(1.05);
+    }
+    
+    .search-section {
+        max-width: 700px;
+        margin: 40px auto 50px;
+        padding: 0 20px;
+        position: relative;
+        z-index: 10;
+    }
+    
+    .search-input {
+        border-radius: 50px;
+        padding: 20px 30px;
+        border: none;
+        font-size: 16px;
+        background: white;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s;
+    }
+    
+    .search-input:focus {
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+        transform: translateY(-2px);
+    }
+    
+    .input-group-text {
+        background: white !important;
+        border: none !important;
+        padding: 0 20px !important;
+    }
+    
+    .main-content-section {
+        background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+        padding: 60px 0;
+    }
+    
+    .filters-sidebar {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        position: sticky;
+        top: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .filters-title {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 25px;
+        color: #333;
+    }
+    
+    .filter-section {
+        margin-bottom: 30px;
+    }
+    
+    .filter-section h6 {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #333;
+    }
+    
+    .category-radio {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        cursor: pointer;
+    }
+    
+    .category-radio input[type="radio"] {
+        width: 20px;
+        height: 20px;
+        margin-right: 12px;
+        cursor: pointer;
+        accent-color: #ff6b35;
+    }
+    
+    .category-radio label {
+        margin: 0;
+        cursor: pointer;
+        font-size: 15px;
+        color: #555;
+    }
+    
+    .price-slider-container {
+        padding: 20px 10px;
+        margin: 15px 0;
+    }
+    
+    /* NoUiSlider Orange Theme */
+    #price-slider {
+        height: 10px;
+        margin: 10px 0 25px 0;
+    }
+    
+    .noUi-target {
+        background: #e8e8e8;
+        border-radius: 1px;
+        border: none;
+        box-shadow: none;
+        height: 2px;
+    }
+    
+    .noUi-connect {
+        background: linear-gradient(90deg, #ff6b35 0%, #ff8542 50%, #ffa052 100%);
+        box-shadow: 0 1px 3px rgba(255, 107, 53, 0.25);
+        border-radius: 1px;
+    }
+    
+    .noUi-handle {
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: #ff6b35;
+        border: 2px solid white;
+        box-shadow: 0 2px 5px rgba(255, 107, 53, 0.3), 0 1px 2px rgba(0,0,0,0.1);
+        cursor: grab;
+        top: -2px;
+        right: -3.5px;
+        transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .noUi-handle:active {
+        cursor: grabbing;
+        transform: scale(1.5);
+        box-shadow: 0 2px 8px rgba(255, 107, 53, 0.4), 0 1px 3px rgba(0,0,0,0.12);
+    }
+    
+    .noUi-handle:hover {
+        transform: scale(1.3);
+        background: #ff8542;
+    }
+    
+    .noUi-handle:before,
+    .noUi-handle:after {
+        display: none;
+    }
+    
+    .price-range-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 15px;
+        font-size: 15px;
+        font-weight: 700;
+    }
+    
+    .price-range-labels span {
+        color: #ff6b35;
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.12) 0%, rgba(255, 133, 66, 0.08) 100%);
+        padding: 8px 14px;
+        border-radius: 10px;
+        border: 2px solid rgba(255, 107, 53, 0.25);
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+    
+    .price-range-labels span:hover {
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.18) 0%, rgba(255, 133, 66, 0.12) 100%);
+        border-color: rgba(255, 107, 53, 0.4);
+        transform: translateY(-2px);
+    }
+    
+    .reset-btn {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        background: white;
+        border-radius: 8px;
+        font-weight: 600;
+        color: #666;
+        transition: all 0.3s;
+    }
+    
+    .reset-btn:hover {
+        background: #f8f9fa;
+        border-color: #ff6b35;
+        color: #ff6b35;
+    }
+    
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+    
+    .section-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a1a1a;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .hot-icon {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-size: 14px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        box-shadow: 0 5px 15px rgba(245, 87, 108, 0.3);
+    }
+    
+    .auction-count {
+        color: #999;
+        font-size: 16px;
+    }
+    
+    .item-card {
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: none;
+        border-radius: 20px;
+        overflow: hidden;
+        height: 100%;
+        background: white;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    .item-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
+    
+    .item-card img {
+        height: 240px;
+        object-fit: cover;
+    }
+    
+    .item-card .card-body {
+        padding: 20px;
+    }
+    
+    .ending-soon-badge {
+        background: linear-gradient(135deg, #ff6b35 0%, #ff4757 100%);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 10px;
+    }
+    
+    .new-badge {
+        background: linear-gradient(135deg, #5f27cd 0%, #341f97 100%);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 10px;
+    }
+    
+    .no-results {
+        text-align: center;
+        padding: 80px 20px;
+        color: #999;
+    }
+    
+    .no-results i {
+        font-size: 64px;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    .item-card .btn-primary {
+        background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+        border: none;
+        padding: 8px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+    
+    .item-card .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+    }
+    
+    .price-display {
+        color: #ff6b35;
+        font-weight: 700;
+    }
+    
+    .feature-badges {
+        margin-top: 40px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+        animation: fadeInUp 1s ease-out 0.6s backwards;
+    }
+    
+    .badge-item {
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(10px);
+        border-radius: 30px;
+        padding: 10px 20px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+        color: white;
+        transition: all 0.3s ease;
+    }
+    
+    .badge-item:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+    }
+    
+    .badge-icon {
+        font-size: 1.1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <!-- Floating Shapes Background -->
+    <div class="floating-shapes">
+        <div class="shape shape1"></div>
+        <div class="shape shape2"></div>
+        <div class="shape shape3"></div>
+    </div>
+    
+    <div class="container hero-content">
+        <div class="text-center">
+            <h1>🎯 Bid on Quality Items</h1>
+            <p class="tagline">
+                Secure online auctions with MTN Mobile Money payment. Find great deals on electronics,<br>
+                fashion, and more. Join thousands of happy bidders today!
+            </p>
+            <div class="hero-buttons">
+                <a href="#auctions" class="btn btn-primary-hero">
+                    <i class="fas fa-bolt"></i> Browse Auctions
+                </a>
+                <a href="#how-it-works" class="btn btn-secondary-hero">
+                    <i class="fas fa-info-circle"></i> How It Works
+                </a>
+            </div>
+            
+            <!-- Compact Feature Badges -->
+            <div class="feature-badges">
+                <div class="badge-item">
+                    <span class="badge-icon">🔒</span>
+                    <span>Secure Payments</span>
+                </div>
+                <div class="badge-item">
+                    <span class="badge-icon">⚡</span>
+                    <span>Live Bidding</span>
+                </div>
+                <div class="badge-item">
+                    <span class="badge-icon">🛡️</span>
+                    <span>Buyer Protection</span>
+                </div>
+                <div class="badge-item">
+                    <span class="badge-icon">💰</span>
+                    <span>Best Deals</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Section -->
+<div class="search-section">
+    <form method="get" action="{% url 'home' %}" id="searchForm">
+        <div class="input-group">
+            <span class="input-group-text bg-white border-end-0" id="searchIcon" style="border-radius: 50px 0 0 50px; border: 2px solid #e0e0e0; border-right: none; cursor: pointer;">
+                <i class="fas fa-search text-muted"></i>
+            </span>
+            <input 
+                type="text" 
+                name="q" 
+                class="form-control search-input border-start-0" 
+                placeholder="Search auctions..." 
+                value="{{ search_query }}"
+                style="border-left: none;">
+            <input type="hidden" name="category" id="hiddenCategory" value="{{ selected_category }}">
+            <input type="hidden" name="min_price" id="hiddenMinPrice" value="{{ min_price }}">
+            <input type="hidden" name="max_price" id="hiddenMaxPrice" value="{{ max_price }}">
+        </div>
+    </form>
+</div>
+
+<!-- Main Content Section -->
+<div class="main-content-section" id="auctions">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Filters Sidebar -->
+            <div class="col-lg-3 col-md-4 mb-4">
+                <div class="filters-sidebar">
+                    <h3 class="filters-title">Filters</h3>
+                    
+                    <!-- Category Filter -->
+                    <div class="filter-section">
+                        <h6>Category</h6>
+                        <div class="category-radio">
+                            <input 
+                                type="radio" 
+                                name="category" 
+                                id="cat-all" 
+                                value="all" 
+                                {% if selected_category == 'all' or not selected_category %}checked{% endif %}
+                                onchange="applyFilters()">
+                            <label for="cat-all">All Categories</label>
+                        </div>
+                        {% for category in all_categories %}
+                        <div class="category-radio">
+                            <input 
+                                type="radio" 
+                                name="category" 
+                                id="cat-{{ category.id }}" 
+                                value="{{ category.name }}" 
+                                {% if selected_category == category.name %}checked{% endif %}
+                                onchange="applyFilters()">
+                            <label for="cat-{{ category.id }}">{{ category.name }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Price Range Filter -->
+                    <div class="filter-section">
+                        <h6>Price Range (UGX)</h6>
+                        <div class="price-slider-container">
+                            <div id="price-slider"></div>
+                            <div class="price-range-labels">
+                                <span id="min-price-label">0</span>
+                                <span id="max-price-label">10.0M</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Reset Button -->
+                    <button type="button" class="reset-btn" onclick="resetFilters()">
+                        Reset Filters
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Items Grid -->
+            <div class="col-lg-9 col-md-8">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span class="hot-icon">
+                            <i class="fas fa-fire"></i> Hot Auctions
+                        </span>
+                    </h2>
+                    <span class="auction-count">{{ item_count }} auction{{ item_count|pluralize }} found</span>
+                </div>
+                
+                {% if items %}
+                <div class="row g-4">
+                    {% for item in items %}
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card item-card">
+                            {% if item.main_image %}
+                            <img src="{{ item.main_image.url }}" class="card-img-top" alt="{{ item.title }}">
+                            {% else %}
+                            <div class="bg-secondary d-flex align-items-center justify-content-center" style="height: 240px;">
+                                <i class="fas fa-image fa-4x text-white"></i>
+                            </div>
+                            {% endif %}
+                            <div class="card-body">
+                                {% if item.is_ending_soon %}
+                                <span class="ending-soon-badge">
+                                    <i class="fas fa-clock"></i> Ending Soon
+                                </span>
+                                {% elif item.is_recently_added %}
+                                <span class="new-badge">
+                                    <i class="fas fa-star"></i> New
+                                </span>
+                                {% endif %}
+                                <h5 class="card-title mb-2">{{ item.title|truncatewords:6 }}</h5>
+                                <p class="card-text text-muted small mb-3">
+                                    <i class="fas fa-tag"></i> {{ item.category.name|default:"Uncategorized" }}
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <small class="text-muted d-block">Current Bid</small>
+                                        <h5 class="price-display mb-0">UGX {{ item.current_price|floatformat:0 }}</h5>
+                                        <small class="text-muted">{{ item.bid_count }} bid{{ item.bid_count|pluralize }}</small>
+                                    </div>
+                                    <a href="{% url 'item_detail' item.pk %}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-gavel"></i> Bid
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="no-results">
+                    <i class="fas fa-search"></i>
+                    <h4>No Auctions Found</h4>
+                    <p>Try adjusting your filters or search query</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.8.1/nouislider.min.js"></script>
+<script>
+    // Global functions for inline event handlers
+    function formatPrice(value) {
+        if (value >= 1000000) {
+            return (value / 1000000).toFixed(1) + 'M';
+        } else if (value >= 1000) {
+            return (value / 1000).toFixed(0) + 'K';
+        }
+        return value.toString();
+    }
+    
+    function applyFilters() {
+        var categoryRadio = document.querySelector('input[name="category"]:checked');
+        var category = categoryRadio ? categoryRadio.value : 'all';
+        var minPriceEl = document.getElementById('hiddenMinPrice');
+        var maxPriceEl = document.getElementById('hiddenMaxPrice');
+        var minPrice = minPriceEl ? minPriceEl.value : '0';
+        var maxPrice = maxPriceEl ? maxPriceEl.value : '10000000';
+        var searchQuery = document.querySelector('input[name="q"]').value;
+        
+        if (document.getElementById('hiddenCategory')) {
+            document.getElementById('hiddenCategory').value = category;
+        }
+        
+        // Build URL properly from base origin and path
+        var url = new URL(window.location.origin + window.location.pathname);
+        url.searchParams.set('category', category);
+        url.searchParams.set('min_price', minPrice);
+        url.searchParams.set('max_price', maxPrice);
+        if (searchQuery) {
+            url.searchParams.set('q', searchQuery);
+        } else {
+            url.searchParams.delete('q');
+        }
+        
+        window.location.href = url.toString();
+    }
+    
+    function resetFilters() {
+        window.location.href = '{% url "home" %}';
+    }
+    
+    // Live search with debounce
+    var searchTimeout;
+    function triggerLiveSearch() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(function() {
+            applyFilters();
+        }, 500);
+    }
+    
+    // Initialize slider when both DOM and noUiSlider are ready
+    function initPriceSlider() {
+        var priceSlider = document.getElementById('price-slider');
+        
+        if (!priceSlider) {
+            console.log('Price slider element not found');
+            return;
+        }
+        
+        // Check if already initialized
+        if (priceSlider.noUiSlider) {
+            console.log('Price slider already initialized');
+            return;
+        }
+        
+        if (typeof noUiSlider === 'undefined') {
+            console.log('noUiSlider library not loaded yet, retrying...');
+            setTimeout(initPriceSlider, 100);
+            return;
+        }
+        
+        var minPrice = parseFloat('{{ min_price }}') || 0;
+        var maxPrice = parseFloat('{{ max_price }}') || 10000000;
+        
+        try {
+            noUiSlider.create(priceSlider, {
+        start: [minPrice, maxPrice],
+        connect: true,
+        range: {
+            'min': 0,
+            'max': 10000000
+        },
+        step: 10000,
+        format: {
+            to: function(value) {
+                return Math.round(value);
+            },
+            from: function(value) {
+                return Number(value);
+            }
+        }
+        });
+        
+        priceSlider.noUiSlider.on('update', function(values, handle) {
+            var minVal = parseInt(values[0]);
+            var maxVal = parseInt(values[1]);
+            
+            document.getElementById('min-price-label').textContent = formatPrice(minVal);
+            document.getElementById('max-price-label').textContent = formatPrice(maxVal);
+            
+            document.getElementById('hiddenMinPrice').value = minVal;
+            document.getElementById('hiddenMaxPrice').value = maxVal;
+        });
+        
+        priceSlider.noUiSlider.on('change', function() {
+            applyFilters();
+        });
+        
+        console.log('Price slider initialized successfully!');
+        } catch (error) {
+            console.error('Error initializing price slider:', error);
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        initPriceSlider();
+    
+    var searchInput = document.querySelector('input[name="q"]');
+    if (searchInput) {
+        // Live search as user types
+        searchInput.addEventListener('input', function(e) {
+            triggerLiveSearch();
+        });
+        
+        // Also trigger on Enter key
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(searchTimeout);
+                applyFilters();
+            }
+        });
+    }
+    
+    // Make search icon clickable
+    var searchIcon = document.getElementById('searchIcon');
+    if (searchIcon) {
+        searchIcon.addEventListener('click', function() {
+            clearTimeout(searchTimeout);
+            applyFilters();
+        });
+    }
+    
+    var browseBtn = document.querySelector('.btn-primary-hero');
+    if (browseBtn) {
+        browseBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var auctionsSection = document.querySelector('#auctions');
+            if (auctionsSection) {
+                auctionsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

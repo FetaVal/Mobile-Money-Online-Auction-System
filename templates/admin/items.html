@@ -1,0 +1,134 @@
+{% extends 'admin/base.html' %}
+
+{% block admin_content %}
+<div class="admin-header">
+    <h1>📦 Item Management</h1>
+    <p>View and moderate auction items</p>
+</div>
+
+<!-- Search and Filter -->
+<div class="search-filter-bar">
+    <form method="get" class="row align-items-center" action="{% url 'admin_items' %}">
+        <div class="col-md-6">
+            <input type="text" name="q" class="form-control" placeholder="Search by title, description, or seller..." value="{{ search_query }}">
+        </div>
+        <div class="col-md-4">
+            <select name="status" class="form-control">
+                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Statuses</option>
+                <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                <option value="sold" {% if status_filter == 'sold' %}selected{% endif %}>Sold</option>
+                <option value="expired" {% if status_filter == 'expired' %}selected{% endif %}>Expired</option>
+                <option value="private" {% if status_filter == 'private' %}selected{% endif %}>Private</option>
+                <option value="off_sale" {% if status_filter == 'off_sale' %}selected{% endif %}>Off Sale</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="fas fa-filter"></i> Filter
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Items Table -->
+<div class="content-card">
+    <h5><i class="fas fa-box"></i> All Items ({{ total_count }})</h5>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Seller</th>
+                    <th>Price (UGX)</th>
+                    <th>Bids</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>
+                        <a href="{% url 'item_detail' item.id %}" style="text-decoration: none; color: #3b82f6; font-weight: 600;">
+                            {{ item.title|truncatewords:8 }}
+                        </a><br>
+                        <small style="color: #64748b;">{{ item.category.name|default:"Uncategorized" }}</small>
+                    </td>
+                    <td>
+                        <a href="{% url 'seller_profile' item.seller.username %}" style="text-decoration: none; color: #3b82f6;">
+                            {{ item.seller.username }}
+                        </a>
+                    </td>
+                    <td><strong>{{ item.current_price|floatformat:0 }}</strong></td>
+                    <td>{{ item.bid_count }}</td>
+                    <td>
+                        {% if item.status == 'active' %}
+                            <span class="badge badge-success">Active</span>
+                        {% elif item.status == 'sold' %}
+                            <span class="badge badge-info">Sold</span>
+                        {% elif item.status == 'expired' %}
+                            <span class="badge badge-secondary">Expired</span>
+                        {% elif item.status == 'private' %}
+                            <span class="badge badge-warning">Private</span>
+                        {% else %}
+                            <span class="badge badge-secondary">{{ item.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ item.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <a href="{% url 'item_detail' item.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                        <button onclick="changeItemStatus({{ item.id }}, '{{ item.title|truncatewords:5|escapejs }}')" class="btn btn-sm btn-outline-warning">
+                            <i class="fas fa-edit"></i> Status
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px; color: #94a3b8;">
+                        <i class="fas fa-box fa-3x mb-3" style="display: block;"></i>
+                        No items found
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function changeItemStatus(itemId, itemTitle) {
+    const newStatus = prompt(`Change status for "${itemTitle}"\\n\\nEnter new status (active, sold, expired, private, off_sale, cancelled):`);
+    if (!newStatus) return;
+    
+    const validStatuses = ['active', 'sold', 'expired', 'private', 'off_sale', 'cancelled'];
+    if (!validStatuses.includes(newStatus.toLowerCase())) {
+        alert('Invalid status! Must be one of: active, sold, expired, private, off_sale, cancelled');
+        return;
+    }
+    
+    fetch(`/dashboard/items/${itemId}/change-status/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `status=${newStatus.toLowerCase()}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Failed to update item status');
+    });
+}
+</script>
+{% endblock %}

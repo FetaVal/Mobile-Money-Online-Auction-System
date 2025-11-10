@@ -1,0 +1,691 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Checkout - AuctionHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .checkout-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding: 40px 0;
+    }
+    
+    .checkout-header {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        padding: 40px 0;
+        margin-bottom: 40px;
+        border-radius: 15px;
+    }
+    
+    .checkout-section {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+        margin-bottom: 30px;
+    }
+    
+    .section-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 25px;
+        color: #1a1a2e;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .payment-method {
+        padding: 20px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .payment-method:hover {
+        border-color: #6366f1;
+        background: #f8f9fa;
+    }
+    
+    .payment-method input[type="radio"] {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .payment-method.selected {
+        border-color: #6366f1;
+        background: #ede9fe;
+    }
+    
+    .payment-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+    }
+    
+    .payment-details {
+        flex: 1;
+    }
+    
+    .payment-name {
+        font-weight: 600;
+        font-size: 18px;
+        color: #1a1a2e;
+    }
+    
+    .payment-desc {
+        font-size: 14px;
+        color: #64748b;
+    }
+    
+    .order-item {
+        display: flex;
+        gap: 15px;
+        padding: 15px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .order-item:last-child {
+        border-bottom: none;
+    }
+    
+    .order-item-image {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        background: #e2e8f0;
+    }
+    
+    .order-total {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1a1a2e;
+        padding: 20px 0;
+        display: flex;
+        justify-content: space-between;
+        border-top: 2px solid #e2e8f0;
+    }
+    
+    .place-order-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 8px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .place-order-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+    }
+    
+    .phone-input {
+        display: none;
+        margin-top: 15px;
+    }
+    
+    .phone-input.show {
+        display: block;
+    }
+    
+    .payment-type-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .payment-type-tab {
+        flex: 1;
+        padding: 12px;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        background: white;
+    }
+    
+    .payment-type-tab.active {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        border-color: #6366f1;
+    }
+    
+    .payment-type-tab:hover {
+        border-color: #6366f1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="checkout-container">
+    <div class="container">
+        <div class="checkout-header">
+            <h1 style="text-align: center; font-size: 36px; font-weight: 700; margin: 0;">
+                🌍 Global Checkout
+            </h1>
+            <p style="text-align: center; margin: 10px 0 0 0; opacity: 0.9;">
+                Choose your country and preferred payment method
+            </p>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-7">
+                <div class="checkout-section">
+                    <h2 class="section-title">
+                        💳 Payment Information
+                    </h2>
+                    
+                    <form method="post" id="checkoutForm">
+                        {% csrf_token %}
+                        
+                        <h3 class="mb-3" style="color: #1a1a2e;">
+                            <i class="fas fa-truck"></i> Delivery Address
+                        </h3>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="delivery_city" class="form-label fw-bold">
+                                    <i class="fas fa-city"></i> Delivery City
+                                </label>
+                                <select class="form-select" id="delivery_city" name="delivery_city" required>
+                                    <option value="">Select City</option>
+                                    {% for city in cities %}
+                                    <option value="{{ city }}">{{ city }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="delivery_area" class="form-label fw-bold">
+                                    <i class="fas fa-map-marker-alt"></i> Delivery Area
+                                </label>
+                                <select class="form-select" id="delivery_area" name="delivery_area" required>
+                                    <option value="">Select City First</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div style="padding: 15px; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border: 2px solid #10b981; border-radius: 8px;">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="pickup_option" name="pickup_option" value="1" style="width: 20px; height: 20px; margin-top: 2px;">
+                                    <label class="form-check-label fw-bold" for="pickup_option" style="font-size: 16px; color: #065f46;">
+                                        <i class="fas fa-store" style="color: #10b981;"></i> Pick up from seller's location
+                                        <span style="background: #10b981; color: white; font-size: 12px; padding: 2px 8px; border-radius: 12px; margin-left: 8px;">FREE</span>
+                                    </label>
+                                    <small class="d-block mt-2" style="color: #065f46;">Select this if you want to collect items directly from sellers and avoid shipping costs</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="border-top: 2px solid #e2e8f0; margin: 2rem 0; padding-top: 2rem;"></div>
+                        
+                        <h3 class="mb-3" style="color: #1a1a2e;">
+                            <i class="fas fa-credit-card"></i> Payment Details
+                        </h3>
+                        
+                        <div class="mb-4">
+                            <label for="country" class="form-label fw-bold" style="font-size: 16px;">
+                                <i class="fas fa-flag"></i> Select Your Country
+                            </label>
+                            <select class="form-select form-select-lg" id="country" name="country" required>
+                                <option value="">🌍 Choose your country...</option>
+                                {% for country in countries %}
+                                <option value="{{ country.code }}" data-currency="{{ country.currency }}" data-local-methods='{{ country.local_payment_methods|safe }}'>
+                                    {{ country.flag_emoji }} {{ country.name }} ({{ country.currency_symbol }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div id="paymentTypeSelector" style="display: none;">
+                            <label class="form-label fw-bold" style="font-size: 16px; margin-bottom: 15px;">
+                                <i class="fas fa-layer-group"></i> Payment Type
+                            </label>
+                            <div class="payment-type-tabs">
+                                <div class="payment-type-tab active" id="localTab" onclick="switchPaymentType('local')">
+                                    <i class="fas fa-mobile-alt"></i> Local Payments
+                                </div>
+                                <div class="payment-type-tab" id="internationalTab" onclick="switchPaymentType('international')">
+                                    <i class="fas fa-globe-americas"></i> International
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="localPayments" style="display: none;">
+                            <label class="form-label fw-bold" style="font-size: 16px; margin-bottom: 15px;">
+                                <i class="fas fa-mobile-alt"></i> Local Payment Methods
+                            </label>
+                            <div id="localMethodsList"></div>
+                        </div>
+                        
+                        <div id="internationalPayments" style="display: none;">
+                            <label class="form-label fw-bold" style="font-size: 16px; margin-bottom: 15px;">
+                                <i class="fas fa-credit-card"></i> International Payment Methods
+                            </label>
+                            
+                            <label class="payment-method" onclick="selectPayment('card')">
+                                <input type="radio" name="payment_method" value="card" id="card">
+                                <div class="payment-icon" style="background: #635BFF;">
+                                    <i class="fab fa-cc-stripe"></i>
+                                </div>
+                                <div class="payment-details">
+                                    <div class="payment-name">Credit/Debit Card</div>
+                                    <div class="payment-desc">Powered by Stripe - Visa, Mastercard, Amex</div>
+                                </div>
+                            </label>
+                            
+                            <label class="payment-method" onclick="selectPayment('paypal')">
+                                <input type="radio" name="payment_method" value="paypal" id="paypal">
+                                <div class="payment-icon" style="background: #003087;">
+                                    <i class="fab fa-paypal"></i>
+                                </div>
+                                <div class="payment-details">
+                                    <div class="payment-name">PayPal</div>
+                                    <div class="payment-desc">Pay with PayPal balance or card</div>
+                                </div>
+                            </label>
+                            
+                            <label class="payment-method" onclick="selectPayment('bank')">
+                                <input type="radio" name="payment_method" value="bank" id="bank">
+                                <div class="payment-icon" style="background: #2196F3;">
+                                    <i class="fas fa-university"></i>
+                                </div>
+                                <div class="payment-details">
+                                    <div class="payment-name">Bank Transfer</div>
+                                    <div class="payment-desc">Direct bank transfer</div>
+                                </div>
+                            </label>
+                        </div>
+                        
+                        <div id="phoneNumberField" class="phone-input">
+                            <label for="phone_number" class="form-label fw-bold">
+                                <i class="fas fa-phone"></i> Mobile Money Number
+                            </label>
+                            <input type="tel" class="form-control form-control-lg" id="phone_number" name="phone_number" placeholder="07XXXXXXXX" pattern="07[0-9]{8}">
+                            <small class="text-muted">Enter your mobile money number</small>
+                        </div>
+                        
+                        <button type="submit" class="place-order-btn mt-4">
+                            <i class="fas fa-lock"></i> Complete Purchase - <span id="totalAmount">UGX {{ total|floatformat:0 }}</span>
+                        </button>
+                    </form>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <small class="text-muted">
+                            <i class="fas fa-shield-alt"></i> Secure payment processing with industry-standard encryption
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-5">
+                <div class="checkout-section">
+                    <h2 class="section-title">
+                        📦 Order Summary
+                    </h2>
+                    
+                    {% for cart_item in cart_items %}
+                    <div class="order-item">
+                        {% if cart_item.item.main_image %}
+                            <img src="{{ cart_item.item.main_image.url }}" alt="{{ cart_item.item.title }}" class="order-item-image">
+                        {% else %}
+                            <div class="order-item-image" style="display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-image fa-2x" style="color: #cbd5e1;"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; color: #1a1a2e;">{{ cart_item.item.title }}</div>
+                            <div style="font-size: 14px; color: #64748b;">Seller: {{ cart_item.item.seller.username }}</div>
+                            
+                            <div style="display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap;">
+                                {% if cart_item.item.free_shipping %}
+                                <span style="background: #10b981; color: white; font-size: 11px; padding: 3px 8px; border-radius: 12px; font-weight: 600;">
+                                    <i class="fas fa-shipping-fast"></i> FREE SHIPPING
+                                </span>
+                                {% endif %}
+                                {% if cart_item.item.pickup_available %}
+                                <span style="background: #6366f1; color: white; font-size: 11px; padding: 3px 8px; border-radius: 12px; font-weight: 600;">
+                                    <i class="fas fa-store"></i> PICKUP
+                                </span>
+                                {% endif %}
+                                {% if not cart_item.item.free_shipping and cart_item.item.shipping_cost_base > 0 %}
+                                <span style="background: #f59e0b; color: white; font-size: 11px; padding: 3px 8px; border-radius: 12px; font-weight: 600;">
+                                    <i class="fas fa-truck"></i> +UGX {{ cart_item.item.shipping_cost_base|floatformat:0 }}
+                                </span>
+                                {% endif %}
+                            </div>
+                            
+                            <div style="font-weight: 600; color: #6366f1; margin-top: 8px;">UGX {{ cart_item.item.current_price|floatformat:0 }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <div style="border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 15px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: #64748b;">
+                            <span>Subtotal</span>
+                            <span>UGX {{ subtotal|floatformat:0 }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: #64748b;">
+                            <span>
+                                <i class="fas fa-shipping-fast"></i> Shipping
+                                <small class="d-block" style="font-size: 11px;">Select delivery address</small>
+                            </span>
+                            <span id="shipping-cost">UGX {{ shipping_cost|default:0|floatformat:0 }}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; color: #64748b;">
+                            <span>Platform Tax ({{ tax_rate }}%)</span>
+                            <span>UGX {{ tax_amount|floatformat:0 }}</span>
+                        </div>
+                    </div>
+                    <div class="order-total">
+                        <span>Total Amount</span>
+                        <span style="color: #6366f1;">UGX {{ total|floatformat:0 }}</span>
+                    </div>
+                    
+                    <div style="background: #ede9fe; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                        <p style="margin: 0; font-size: 14px; color: #6366f1;">
+                            <strong>🔒 Secure Payment</strong><br>
+                            Your payment information is encrypted and secure
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const countrySelect = document.getElementById('country');
+const paymentTypeSelector = document.getElementById('paymentTypeSelector');
+const localPayments = document.getElementById('localPayments');
+const internationalPayments = document.getElementById('internationalPayments');
+const localMethodsList = document.getElementById('localMethodsList');
+const phoneNumberField = document.getElementById('phoneNumberField');
+const localTab = document.getElementById('localTab');
+const internationalTab = document.getElementById('internationalTab');
+
+const ugandaLocalMethods = [
+    { value: 'mtn', name: 'MTN Mobile Money', icon: 'fas fa-mobile-alt', color: '#FFCB05', desc: 'Pay securely with MTN MoMo' },
+    { value: 'airtel', name: 'Airtel Money', icon: 'fas fa-mobile-alt', color: '#E2231A', desc: 'Pay with Airtel Money' }
+];
+
+countrySelect.addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const countryCode = selectedOption.value;
+    
+    if (countryCode) {
+        paymentTypeSelector.style.display = 'block';
+        switchPaymentType('local', countryCode);
+        loadCitiesForCountry(countryCode);
+    } else {
+        paymentTypeSelector.style.display = 'none';
+        localPayments.style.display = 'none';
+        internationalPayments.style.display = 'none';
+        deliveryCitySelect.innerHTML = '<option value="">Select Country First</option>';
+        deliveryCitySelect.disabled = true;
+        deliveryAreaSelect.innerHTML = '<option value="">Select City First</option>';
+        deliveryAreaSelect.disabled = true;
+    }
+});
+
+function switchPaymentType(paymentType, countryCode) {
+    if (!countryCode) {
+        countryCode = countrySelect.value;
+    }
+    
+    if (paymentType === 'local') {
+        localTab.classList.add('active');
+        internationalTab.classList.remove('active');
+        localPayments.style.display = 'block';
+        internationalPayments.style.display = 'none';
+        
+        if (countryCode === 'UG') {
+            localMethodsList.innerHTML = ugandaLocalMethods.map(method => `
+                <label class="payment-method" onclick="selectPayment('${method.value}')">
+                    <input type="radio" name="payment_method" value="${method.value}" id="${method.value}" required>
+                    <div class="payment-icon" style="background: ${method.color};">
+                        <i class="${method.icon}"></i>
+                    </div>
+                    <div class="payment-details">
+                        <div class="payment-name">${method.name}</div>
+                        <div class="payment-desc">${method.desc}</div>
+                    </div>
+                </label>
+            `).join('');
+            
+            setTimeout(() => {
+                selectPayment('mtn');
+            }, 100);
+        } else {
+            localMethodsList.innerHTML = '<p class="text-muted" style="padding: 20px; text-align: center;">No local payment methods available for this country. Please use international payment methods.</p>';
+        }
+    } else {
+        localTab.classList.remove('active');
+        internationalTab.classList.add('active');
+        localPayments.style.display = 'none';
+        internationalPayments.style.display = 'block';
+    }
+}
+
+function selectPayment(method) {
+    document.querySelectorAll('.payment-method').forEach(el => {
+        el.classList.remove('selected');
+    });
+    
+    const methodEl = document.getElementById(method);
+    if (methodEl) {
+        methodEl.checked = true;
+        methodEl.closest('.payment-method').classList.add('selected');
+    }
+    
+    if (method === 'mtn' || method === 'airtel') {
+        phoneNumberField.classList.add('show');
+        document.getElementById('phone_number').required = true;
+    } else {
+        phoneNumberField.classList.remove('show');
+        document.getElementById('phone_number').required = false;
+    }
+}
+
+const deliveryCitySelect = document.getElementById('delivery_city');
+const deliveryAreaSelect = document.getElementById('delivery_area');
+const pickupCheckbox = document.getElementById('pickup_option');
+
+function loadCitiesForCountry(countryCode) {
+    if (!deliveryCitySelect) return;
+    
+    deliveryCitySelect.disabled = true;
+    deliveryCitySelect.innerHTML = '<option value="">Loading cities...</option>';
+    deliveryAreaSelect.innerHTML = '<option value="">Select City First</option>';
+    deliveryAreaSelect.disabled = true;
+    
+    fetch(`/get-cities/${countryCode}/`)
+        .then(response => response.json())
+        .then(data => {
+            deliveryCitySelect.innerHTML = '<option value="">Select City</option>';
+            if (data.cities && data.cities.length > 0) {
+                data.cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    deliveryCitySelect.appendChild(option);
+                });
+                deliveryCitySelect.disabled = false;
+            } else {
+                deliveryCitySelect.innerHTML = '<option value="">No cities available</option>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading cities:', error);
+            deliveryCitySelect.innerHTML = '<option value="">Error loading cities</option>';
+        });
+}
+
+if (deliveryCitySelect && deliveryAreaSelect) {
+    deliveryCitySelect.addEventListener('change', function() {
+        const selectedCity = this.value;
+        const countryCode = countrySelect.value || 'UG';
+        
+        if (!selectedCity) {
+            deliveryAreaSelect.innerHTML = '<option value="">Select City First</option>';
+            deliveryAreaSelect.disabled = true;
+            return;
+        }
+        
+        deliveryAreaSelect.disabled = false;
+        
+        fetch(`/get-areas/${selectedCity}/?country=${countryCode}`)
+            .then(response => response.json())
+            .then(data => {
+                deliveryAreaSelect.innerHTML = '<option value="">Select Area</option>';
+                data.areas.forEach(area => {
+                    const option = document.createElement('option');
+                    option.value = area;
+                    option.textContent = area;
+                    deliveryAreaSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading areas:', error);
+                deliveryAreaSelect.innerHTML = '<option value="">Error loading areas</option>';
+            });
+    });
+}
+
+if (pickupCheckbox) {
+    pickupCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            deliveryCitySelect.disabled = true;
+            deliveryAreaSelect.disabled = true;
+            deliveryCitySelect.required = false;
+            deliveryAreaSelect.required = false;
+            updateShippingCost();
+        } else {
+            deliveryCitySelect.disabled = false;
+            deliveryAreaSelect.disabled = false;
+            deliveryCitySelect.required = true;
+            deliveryAreaSelect.required = true;
+            updateShippingCost();
+        }
+    });
+}
+
+function updateShippingCost() {
+    const deliveryCity = deliveryCitySelect.value;
+    const deliveryArea = deliveryAreaSelect.value;
+    const pickup = pickupCheckbox.checked;
+    
+    if (pickup || (!deliveryCity || !deliveryArea)) {
+        const shippingElement = document.getElementById('shipping-cost');
+        const taxElement = document.querySelector('.order-total').previousElementSibling.querySelector('span:last-child');
+        const totalElement = document.querySelector('.order-total span:last-child');
+        const totalButtonElement = document.getElementById('totalAmount');
+        
+        if (pickup) {
+            shippingElement.textContent = 'FREE';
+        }
+        
+        if (pickup || !deliveryCity || !deliveryArea) {
+            const subtotal = {{ subtotal|floatformat:0 }};
+            const taxRate = {{ tax_rate }} / 100;
+            const shippingCost = pickup ? 0 : 0;
+            const taxAmount = (subtotal + shippingCost) * taxRate;
+            const total = subtotal + shippingCost + taxAmount;
+            
+            if (!pickup) {
+                shippingElement.textContent = 'UGX 0';
+            }
+            taxElement.textContent = `UGX ${Math.round(taxAmount).toLocaleString()}`;
+            totalElement.textContent = `UGX ${Math.round(total).toLocaleString()}`;
+            totalButtonElement.textContent = `UGX ${Math.round(total).toLocaleString()}`;
+        }
+        
+        return;
+    }
+    
+    fetch(`/calculate-shipping/?city=${deliveryCity}&area=${deliveryArea}`)
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(errorData => {
+                    throw new Error(errorData.error || 'Failed to calculate shipping');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                console.error('Shipping calculation error:', data.error);
+                const subtotal = {{ subtotal|floatformat:0 }};
+                const taxRate = {{ tax_rate }} / 100;
+                const shippingCost = 0;
+                const taxAmount = (subtotal + shippingCost) * taxRate;
+                const total = subtotal + shippingCost + taxAmount;
+                
+                const shippingElement = document.getElementById('shipping-cost');
+                const taxElement = document.querySelector('.order-total').previousElementSibling.querySelector('span:last-child');
+                const totalElement = document.querySelector('.order-total span:last-child');
+                const totalButtonElement = document.getElementById('totalAmount');
+                
+                shippingElement.textContent = 'UGX 0';
+                taxElement.textContent = `UGX ${Math.round(taxAmount).toLocaleString()}`;
+                totalElement.textContent = `UGX ${Math.round(total).toLocaleString()}`;
+                totalButtonElement.textContent = `UGX ${Math.round(total).toLocaleString()}`;
+                return;
+            }
+            
+            const shippingElement = document.getElementById('shipping-cost');
+            const taxElement = document.querySelector('.order-total').previousElementSibling.querySelector('span:last-child');
+            const totalElement = document.querySelector('.order-total span:last-child');
+            const totalButtonElement = document.getElementById('totalAmount');
+            
+            shippingElement.textContent = `UGX ${Math.round(data.shipping_cost).toLocaleString()}`;
+            taxElement.textContent = `UGX ${Math.round(data.tax_amount).toLocaleString()}`;
+            totalElement.textContent = `UGX ${Math.round(data.total).toLocaleString()}`;
+            totalButtonElement.textContent = `UGX ${Math.round(data.total).toLocaleString()}`;
+        })
+        .catch(error => {
+            console.error('Error calculating shipping:', error);
+            const subtotal = {{ subtotal|floatformat:0 }};
+            const taxRate = {{ tax_rate }} / 100;
+            const shippingCost = 0;
+            const taxAmount = (subtotal + shippingCost) * taxRate;
+            const total = subtotal + shippingCost + taxAmount;
+            
+            const shippingElement = document.getElementById('shipping-cost');
+            const taxElement = document.querySelector('.order-total').previousElementSibling.querySelector('span:last-child');
+            const totalElement = document.querySelector('.order-total span:last-child');
+            const totalButtonElement = document.getElementById('totalAmount');
+            
+            shippingElement.textContent = 'UGX 0';
+            taxElement.textContent = `UGX ${Math.round(taxAmount).toLocaleString()}`;
+            totalElement.textContent = `UGX ${Math.round(total).toLocaleString()}`;
+            totalButtonElement.textContent = `UGX ${Math.round(total).toLocaleString()}`;
+        });
+}
+
+if (deliveryAreaSelect) {
+    deliveryAreaSelect.addEventListener('change', updateShippingCost);
+}
+</script>
+{% endblock %}

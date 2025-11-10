@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Shopping Cart - AuctionHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cart-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding: 40px 0;
+    }
+    
+    .cart-header {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        padding: 40px 0;
+        margin-bottom: 40px;
+        border-radius: 15px;
+    }
+    
+    .cart-items-section {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+        margin-bottom: 30px;
+    }
+    
+    .cart-item {
+        display: flex;
+        gap: 20px;
+        padding: 20px;
+        border-bottom: 1px solid #e2e8f0;
+        transition: all 0.3s;
+    }
+    
+    .cart-item:last-child {
+        border-bottom: none;
+    }
+    
+    .cart-item:hover {
+        background: #f8f9fa;
+    }
+    
+    .item-image {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+        background: #e2e8f0;
+    }
+    
+    .item-details {
+        flex: 1;
+    }
+    
+    .item-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #1a1a2e;
+        margin-bottom: 8px;
+    }
+    
+    .item-seller {
+        color: #64748b;
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+    
+    .item-price {
+        font-size: 24px;
+        font-weight: 700;
+        color: #6366f1;
+    }
+    
+    .remove-btn {
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 600;
+    }
+    
+    .remove-btn:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+    }
+    
+    .cart-summary {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+        position: sticky;
+        top: 100px;
+    }
+    
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .summary-total {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1a1a2e;
+        padding-top: 20px;
+    }
+    
+    .checkout-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 8px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: all 0.3s;
+    }
+    
+    .checkout-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+    }
+    
+    .empty-cart {
+        text-align: center;
+        padding: 80px 20px;
+        color: #94a3b8;
+    }
+    
+    .empty-cart i {
+        font-size: 80px;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    .continue-shopping {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 12px 30px;
+        background: #6366f1;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .continue-shopping:hover {
+        background: #4f46e5;
+        transform: translateY(-2px);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cart-container">
+    <div class="container">
+        <div class="cart-header">
+            <h1 style="text-align: center; font-size: 36px; font-weight: 700; margin: 0;">
+                🛒 Your Shopping Cart
+            </h1>
+            <p style="text-align: center; margin: 10px 0 0 0; opacity: 0.9;">
+                {% if cart_items %}{{ cart_items.count }} item{{ cart_items.count|pluralize }}{% else %}Empty{% endif %}
+            </p>
+        </div>
+        
+        {% if cart_items %}
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="cart-items-section">
+                    <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 25px;">Items</h2>
+                    
+                    {% for cart_item in cart_items %}
+                    <div class="cart-item">
+                        <a href="{% url 'item_detail' cart_item.item.pk %}">
+                            {% if cart_item.item.main_image %}
+                                <img src="{{ cart_item.item.main_image.url }}" alt="{{ cart_item.item.title }}" class="item-image">
+                            {% else %}
+                                <div class="item-image" style="display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-image fa-3x" style="color: #cbd5e1;"></i>
+                                </div>
+                            {% endif %}
+                        </a>
+                        
+                        <div class="item-details">
+                            <a href="{% url 'item_detail' cart_item.item.pk %}" style="text-decoration: none; color: inherit;">
+                                <h3 class="item-title">{{ cart_item.item.title }}</h3>
+                            </a>
+                            <p class="item-seller">
+                                Seller: <a href="{% url 'seller_profile' cart_item.item.seller.username %}" style="color: #6366f1;">{{ cart_item.item.seller.username }}</a>
+                            </p>
+                            <p style="color: #64748b; font-size: 14px;">
+                                Added {{ cart_item.added_at|timesince }} ago
+                            </p>
+                            <div class="item-price">UGX {{ cart_item.item.current_price|floatformat:0 }}</div>
+                        </div>
+                        
+                        <div>
+                            <form method="post" action="{% url 'cart_remove' cart_item.pk %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="remove-btn">
+                                    🗑️ Remove
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="cart-summary">
+                    <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 25px;">Order Summary</h2>
+                    
+                    <div class="summary-row">
+                        <span>Subtotal ({{ cart_items.count }} item{{ cart_items.count|pluralize }})</span>
+                        <span style="font-weight: 600;">UGX {{ total|floatformat:0 }}</span>
+                    </div>
+                    
+                    <div class="summary-row" style="border-bottom: none;">
+                        <span>Shipping</span>
+                        <span style="font-weight: 600;">{% if shipping_estimate > 0 %}UGX {{ shipping_estimate|floatformat:0 }}{% else %}<span style="color: #10b981;">FREE</span>{% endif %}</span>
+                    </div>
+                    
+                    <div class="summary-total">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Total</span>
+                            <span style="color: #6366f1;">UGX {{ cart_total|floatformat:0 }}</span>
+                        </div>
+                    </div>
+                    
+                    <a href="{% url 'checkout' %}" class="checkout-btn" style="text-decoration: none; display: block; text-align: center;">
+                        💳 Proceed to Checkout
+                    </a>
+                    
+                    <a href="{% url 'home' %}" class="continue-shopping" style="display: block; text-align: center; margin-top: 15px; background: transparent; color: #6366f1; padding: 0;">
+                        ← Continue Shopping
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="cart-items-section">
+            <div class="empty-cart">
+                <i class="fas fa-shopping-cart"></i>
+                <h2 style="font-size: 28px; font-weight: 600; margin-bottom: 10px;">Your Cart is Empty</h2>
+                <p>Start bidding and winning auctions to add items to your cart!</p>
+                <a href="{% url 'home' %}" class="continue-shopping">
+                    Browse Auctions
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

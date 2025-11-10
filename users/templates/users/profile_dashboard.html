@@ -1,0 +1,858 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Profile - AuctionHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding: 40px 0;
+    }
+    
+    .profile-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px 0;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    }
+    
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 5px solid white;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        object-fit: cover;
+    }
+    
+    .profile-name {
+        font-size: 32px;
+        font-weight: 700;
+        margin: 15px 0 5px;
+    }
+    
+    .profile-email {
+        opacity: 0.9;
+        font-size: 16px;
+    }
+    
+    .profile-rating {
+        margin-top: 10px;
+        font-size: 24px;
+    }
+    
+    .stats-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    .stats-value {
+        font-size: 36px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 5px;
+    }
+    
+    .stats-label {
+        color: #1e293b;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    
+    .nav-tabs {
+        border-bottom: 2px solid #e2e8f0;
+        margin-bottom: 30px;
+    }
+    
+    .nav-tabs .nav-link {
+        color: #1e293b;
+        border: none;
+        padding: 15px 25px;
+        font-weight: 600;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s;
+    }
+    
+    .nav-tabs .nav-link:hover {
+        color: #667eea;
+        border-bottom-color: #667eea;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #667eea;
+        background: none;
+        border-bottom-color: #667eea;
+    }
+    
+    .item-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        transition: transform 0.3s, box-shadow 0.3s;
+        margin-bottom: 20px;
+    }
+    
+    .item-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    .item-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+    
+    .item-details {
+        padding: 20px;
+    }
+    
+    .item-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 10px;
+    }
+    
+    .item-price {
+        font-size: 24px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .item-status {
+        display: inline-block;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .status-active {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+    
+    .status-sold {
+        background: #dcfce7;
+        color: #166534;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #94a3b8;
+    }
+    
+    .empty-state-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+    }
+    
+    .cart-item {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+    }
+    
+    .cart-item-image {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+    
+    .cart-item-details {
+        flex: 1;
+    }
+    
+    .edit-profile-btn {
+        background: white;
+        color: #667eea;
+        border: 2px solid white;
+        padding: 10px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+        display: inline-block;
+        margin-right: 10px;
+    }
+    
+    .edit-profile-btn:hover {
+        background: transparent;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .share-profile-btn {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border: 2px solid white;
+        padding: 10px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+        display: inline-block;
+        cursor: pointer;
+    }
+    
+    .share-profile-btn:hover {
+        background: white;
+        color: #667eea;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="container">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-auto text-center text-md-left">
+                        {% if user.profile.profile_picture %}
+                            <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.username }}" class="profile-avatar">
+                        {% else %}
+                            <div class="profile-avatar" style="background: white; display: flex; align-items: center; justify-content: center; font-size: 48px; color: #667eea;">
+                                {{ user.username|first|upper }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md">
+                        <div class="profile-name">
+                            {{ user.username }}
+                            {% if user.is_superuser %}
+                                <span class="badge" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; font-size: 16px; padding: 8px 16px; border-radius: 20px; margin-left: 10px; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);">
+                                    <i class="fas fa-crown"></i> Admin
+                                </span>
+                            {% elif user.profile.seller_status == 'approved' %}
+                                <span class="badge" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; font-size: 16px; padding: 8px 16px; border-radius: 20px; margin-left: 10px; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+                                    <i class="fas fa-check-circle"></i> Verified Seller
+                                </span>
+                            {% endif %}
+                        </div>
+                        <div class="profile-email">{{ user.email }}</div>
+                        
+                        {% if user.profile.bio %}
+                        <div class="mt-2" style="opacity: 0.95; font-size: 15px; max-width: 500px;">
+                            <i class="fas fa-info-circle"></i> {{ user.profile.bio }}
+                        </div>
+                        {% endif %}
+                        
+                        {% if user.profile.phone_number %}
+                        <div class="mt-2" style="opacity: 0.95; font-size: 15px;">
+                            <i class="fas fa-phone"></i> {{ user.profile.phone_number }}
+                            {% if user.profile.hide_phone_number %}
+                            <span class="badge bg-light text-dark ms-2" style="font-size: 11px;">
+                                <i class="fas fa-eye-slash"></i> Hidden from public
+                            </span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="profile-rating mt-2">
+                            {% if user.profile.rating_count > 0 %}
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= user.profile.average_rating %}⭐{% else %}☆{% endif %}
+                                {% endfor %}
+                                <span style="opacity: 0.8; font-size: 16px;">({{ user.profile.rating_count }})</span>
+                            {% else %}
+                                <span style="opacity: 0.8; font-size: 16px;">No ratings yet</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-auto mt-3 mt-md-0 d-flex gap-2">
+                        <a href="{% url 'profile_edit' %}" class="edit-profile-btn">
+                            ✏️ Edit Profile
+                        </a>
+                        <button class="share-profile-btn" data-bs-toggle="modal" data-bs-target="#shareProfileModal" data-profile-username="{{ user.username }}" data-profile-url="{% url 'profile' %}">
+                            <i class="fas fa-share-alt"></i> Share Profile
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-lg-2 col-md-4 col-6 mb-3">
+                <div class="stats-card">
+                    <div class="stats-value">{{ followers_count }}</div>
+                    <div class="stats-label">Followers</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6 mb-3">
+                <div class="stats-card">
+                    <div class="stats-value">{{ following_count }}</div>
+                    <div class="stats-label">Following</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6 mb-3">
+                <div class="stats-card">
+                    <div class="stats-value">{{ total_bids }}</div>
+                    <div class="stats-label">Total Bids</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6 mb-3">
+                <div class="stats-card">
+                    <div class="stats-value">{{ total_won }}</div>
+                    <div class="stats-label">Items Won</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6 mb-3">
+                <div class="stats-card">
+                    <div class="stats-value">{{ items_selling.count }}</div>
+                    <div class="stats-label">Selling</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-6 mb-3">
+                <div class="stats-card">
+                    <div class="stats-value">UGX {{ total_spent|floatformat:0 }}</div>
+                    <div class="stats-label">Total Spent</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tabs Navigation -->
+        <ul class="nav nav-tabs" id="profileTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="followers-tab" data-bs-toggle="tab" href="#followers" role="tab">
+                    👥 Followers ({{ followers_count }})
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="following-tab" data-bs-toggle="tab" href="#following" role="tab">
+                    ❤️ Following ({{ following_count }})
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="won-tab" data-bs-toggle="tab" href="#won" role="tab">
+                    🏆 Items Won ({{ items_won.count }})
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="cart-tab" data-bs-toggle="tab" href="#cart" role="tab">
+                    🛒 My Cart ({{ cart_items.count }})
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="selling-tab" data-bs-toggle="tab" href="#selling" role="tab">
+                    📦 Selling ({{ items_selling.count }})
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="sold-tab" data-bs-toggle="tab" href="#sold" role="tab">
+                    ✅ Sold ({{ items_sold.count }})
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="bids-tab" data-bs-toggle="tab" href="#bids" role="tab">
+                    💰 Active Bids
+                </a>
+            </li>
+        </ul>
+        
+        <!-- Tab Content -->
+        <div class="tab-content" id="profileTabsContent">
+            <!-- Followers Tab -->
+            <div class="tab-pane fade show active" id="followers" role="tabpanel">
+                {% if followers_list %}
+                    <div class="row">
+                        {% for follow in followers_list %}
+                            <div class="col-md-6 mb-3">
+                                <div class="cart-item" style="cursor: pointer;" onclick="window.location='{% url 'seller_profile' follow.follower.username %}'">
+                                    {% if follow.follower.profile.profile_picture %}
+                                        <img src="{{ follow.follower.profile.profile_picture.url }}" alt="{{ follow.follower.username }}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid #667eea;">
+                                    {% else %}
+                                        <div style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700;">
+                                            {{ follow.follower.username|first|upper }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="cart-item-details">
+                                        <div style="font-weight: 600; font-size: 16px; color: #1e293b;">
+                                            {{ follow.follower.username }}
+                                            {% if follow.follower.is_superuser %}
+                                                <span class="badge" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; font-size: 11px; padding: 4px 10px; border-radius: 12px; margin-left: 5px;">
+                                                    <i class="fas fa-crown"></i> Admin
+                                                </span>
+                                            {% elif follow.follower.profile.seller_status == 'approved' %}
+                                                <span class="badge" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; font-size: 11px; padding: 4px 10px; border-radius: 12px; margin-left: 5px;">
+                                                    <i class="fas fa-check-circle"></i> Seller
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                        <div style="color: #475569; font-size: 14px;">
+                                            {% if follow.follower.profile.rating_count > 0 %}
+                                                ⭐ {{ follow.follower.profile.average_rating }} ({{ follow.follower.profile.rating_count }} reviews)
+                                            {% else %}
+                                                No ratings yet
+                                            {% endif %}
+                                        </div>
+                                        <small style="color: #64748b;">Following since {{ follow.created_at|timesince }} ago</small>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👥</div>
+                        <h4>No followers yet</h4>
+                        <p>Share your profile to get more followers!</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Following Tab -->
+            <div class="tab-pane fade" id="following" role="tabpanel">
+                {% if following_list %}
+                    <div class="row">
+                        {% for follow in following_list %}
+                            <div class="col-md-6 mb-3">
+                                <div class="cart-item" style="cursor: pointer;" onclick="window.location='{% url 'seller_profile' follow.following.username %}'">
+                                    {% if follow.following.profile.profile_picture %}
+                                        <img src="{{ follow.following.profile.profile_picture.url }}" alt="{{ follow.following.username }}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid #667eea;">
+                                    {% else %}
+                                        <div style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700;">
+                                            {{ follow.following.username|first|upper }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="cart-item-details">
+                                        <div style="font-weight: 600; font-size: 16px; color: #1e293b;">
+                                            {{ follow.following.username }}
+                                            {% if follow.following.is_superuser %}
+                                                <span class="badge" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; font-size: 11px; padding: 4px 10px; border-radius: 12px; margin-left: 5px;">
+                                                    <i class="fas fa-crown"></i> Admin
+                                                </span>
+                                            {% elif follow.following.profile.seller_status == 'approved' %}
+                                                <span class="badge" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; font-size: 11px; padding: 4px 10px; border-radius: 12px; margin-left: 5px;">
+                                                    <i class="fas fa-check-circle"></i> Seller
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                        <div style="color: #475569; font-size: 14px;">
+                                            {% if follow.following.profile.rating_count > 0 %}
+                                                ⭐ {{ follow.following.profile.average_rating }} ({{ follow.following.profile.rating_count }} reviews)
+                                            {% else %}
+                                                No ratings yet
+                                            {% endif %}
+                                        </div>
+                                        <small style="color: #64748b;">Following since {{ follow.created_at|timesince }} ago</small>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❤️</div>
+                        <h4>Not following anyone yet</h4>
+                        <p>Discover great sellers and start following them!</p>
+                        <a href="{% url 'home' %}" class="btn btn-primary">Browse Auctions</a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Items Won Tab -->
+            <div class="tab-pane fade" id="won" role="tabpanel">
+                {% if items_won %}
+                    <div class="row">
+                        {% for item in items_won %}
+                            <div class="col-md-4">
+                                <div class="item-card">
+                                    <img src="{% if item.main_image %}{{ item.main_image.url }}{% else %}{% static 'images/default.jpg' %}{% endif %}" alt="{{ item.title }}" class="item-image">
+                                    <div class="item-details">
+                                        <span class="item-status status-sold">Won</span>
+                                        <div class="item-title">{{ item.title }}</div>
+                                        <div class="item-price">UGX {{ item.current_price|floatformat:0 }}</div>
+                                        <div class="mt-3">
+                                            <a href="{% url 'item_detail' item.pk %}" class="btn btn-outline-primary btn-sm btn-block">
+                                                View Details
+                                            </a>
+                                            <a href="{% url 'cart_add' item.pk %}" class="btn btn-primary btn-sm btn-block">
+                                                🛒 Add to Cart
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🏆</div>
+                        <h4>No items won yet</h4>
+                        <p>Start bidding on auctions to win amazing items!</p>
+                        <a href="{% url 'home' %}" class="btn btn-primary">Browse Auctions</a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- My Cart Tab -->
+            <div class="tab-pane fade" id="cart" role="tabpanel">
+                {% if cart_items %}
+                    {% for cart_item in cart_items %}
+                        <div class="cart-item">
+                            <img src="{% if cart_item.item.main_image %}{{ cart_item.item.main_image.url }}{% else %}{% static 'images/default.jpg' %}{% endif %}" alt="{{ cart_item.item.title }}" class="cart-item-image">
+                            <div class="cart-item-details">
+                                <div style="font-weight: 600; font-size: 16px;">{{ cart_item.item.title }}</div>
+                                <div style="color: #667eea; font-weight: 700; font-size: 18px;">UGX {{ cart_item.item.current_price|floatformat:0 }}</div>
+                            </div>
+                            <a href="{% url 'cart_remove' cart_item.item.pk %}" class="btn btn-outline-danger btn-sm">Remove</a>
+                        </div>
+                    {% endfor %}
+                    <div class="card mt-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h4 style="margin: 0;">Total: UGX {{ cart_total|floatformat:0 }}</h4>
+                                    <small style="opacity: 0.9;">{{ cart_items.count }} item{{ cart_items.count|pluralize }}</small>
+                                </div>
+                                <a href="{% url 'checkout' %}" class="btn btn-light btn-lg">
+                                    Proceed to Checkout
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🛒</div>
+                        <h4>Your cart is empty</h4>
+                        <p>Add won items to your cart to proceed with checkout</p>
+                        <a href="{% url 'home' %}" class="btn btn-primary">Browse Auctions</a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Items Selling Tab -->
+            <div class="tab-pane fade" id="selling" role="tabpanel">
+                {% if items_selling %}
+                    <div class="row">
+                        {% for item in items_selling %}
+                            <div class="col-md-4">
+                                <div class="item-card">
+                                    <img src="{% if item.main_image %}{{ item.main_image.url }}{% else %}{% static 'images/default.jpg' %}{% endif %}" alt="{{ item.title }}" class="item-image">
+                                    <div class="item-details">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="item-status {% if item.status == 'active' %}status-active{% elif item.status == 'sold' %}status-sold{% else %}bg-secondary text-white{% endif %}" style="padding: 5px 12px; border-radius: 20px; font-size: 12px;">
+                                                {{ item.get_status_display }}
+                                            </span>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 4px 10px; font-size: 12px;">
+                                                    <i class="fas fa-cog"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item change-item-status" href="#" data-item-id="{{ item.id }}" data-status="active">
+                                                        <i class="fas fa-check-circle text-success"></i> Mark Active
+                                                    </a></li>
+                                                    <li><a class="dropdown-item change-item-status" href="#" data-item-id="{{ item.id }}" data-status="private">
+                                                        <i class="fas fa-lock text-warning"></i> Make Private
+                                                    </a></li>
+                                                    <li><a class="dropdown-item change-item-status" href="#" data-item-id="{{ item.id }}" data-status="off_sale">
+                                                        <i class="fas fa-pause-circle text-info"></i> Put Off Sale
+                                                    </a></li>
+                                                    <li><a class="dropdown-item change-item-status" href="#" data-item-id="{{ item.id }}" data-status="sold">
+                                                        <i class="fas fa-dollar-sign text-primary"></i> Mark as Sold
+                                                    </a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="item-title">{{ item.title }}</div>
+                                        <div class="item-price">UGX {{ item.current_price|floatformat:0 }}</div>
+                                        <div style="color: #64748b; font-size: 14px; margin-top: 10px;">
+                                            {{ item.bid_count }} bid{{ item.bid_count|pluralize }}
+                                        </div>
+                                        <a href="{% url 'item_detail' item.pk %}" class="btn btn-outline-primary btn-sm btn-block mt-2">
+                                            View Details
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📦</div>
+                        <h4>No active listings</h4>
+                        <p>List items to start selling on AuctionHub</p>
+                        <a href="{% url 'sell_item' %}" class="btn btn-primary">Sell an Item</a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Items Sold Tab -->
+            <div class="tab-pane fade" id="sold" role="tabpanel">
+                {% if items_sold %}
+                    <div class="row">
+                        {% for item in items_sold %}
+                            <div class="col-md-4">
+                                <div class="item-card">
+                                    <img src="{% if item.main_image %}{{ item.main_image.url }}{% else %}{% static 'images/default.jpg' %}{% endif %}" alt="{{ item.title }}" class="item-image">
+                                    <div class="item-details">
+                                        <span class="item-status status-sold">Sold</span>
+                                        <div class="item-title">{{ item.title }}</div>
+                                        <div class="item-price">UGX {{ item.current_price|floatformat:0 }}</div>
+                                        <div style="color: #64748b; font-size: 14px; margin-top: 10px;">
+                                            Sold to: {{ item.winner.username }}
+                                        </div>
+                                        <a href="{% url 'item_detail' item.pk %}" class="btn btn-outline-primary btn-sm btn-block mt-2">
+                                            View Details
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">✅</div>
+                        <h4>No sold items yet</h4>
+                        <p>Your sold items will appear here</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Active Bids Tab -->
+            <div class="tab-pane fade" id="bids" role="tabpanel">
+                {% if active_bids %}
+                    {% for bid in active_bids %}
+                        <div class="cart-item">
+                            <img src="{% if bid.item.main_image %}{{ bid.item.main_image.url }}{% else %}{% static 'images/default.jpg' %}{% endif %}" alt="{{ bid.item.title }}" class="cart-item-image">
+                            <div class="cart-item-details">
+                                <div style="font-weight: 600; font-size: 16px;">{{ bid.item.title }}</div>
+                                <div style="color: #64748b; font-size: 14px;">
+                                    Your bid: UGX {{ bid.amount|floatformat:0 }}
+                                    {% if bid.is_winning %}
+                                        <span style="color: #10b981; font-weight: 600;">🏆 Winning!</span>
+                                    {% else %}
+                                        <span style="color: #ef4444;">Currently outbid</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <a href="{% url 'item_detail' bid.item.pk %}" class="btn btn-primary btn-sm">View Auction</a>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💰</div>
+                        <h4>No active bids</h4>
+                        <p>Place bids on active auctions to see them here</p>
+                        <a href="{% url 'home' %}" class="btn btn-primary">Browse Auctions</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Share Profile Modal -->
+<div class="modal fade" id="shareProfileModal" tabindex="-1" aria-labelledby="shareProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 15px; border: none;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px 15px 0 0;">
+                <h5 class="modal-title" id="shareProfileModalLabel">
+                    <i class="fas fa-share-alt"></i> Share Profile in Chat
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="padding: 25px;">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Search for a user:</label>
+                    <input type="text" class="form-control" id="userSearchInput" placeholder="Type username...">
+                </div>
+                <div id="userListContainer" style="max-height: 300px; overflow-y: auto;">
+                    <div class="text-center text-muted py-3">
+                        <i class="fas fa-search"></i> Start typing to search for users
+                    </div>
+                </div>
+                <div id="searchSpinner" class="text-center py-3" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Helper function to get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle item status change
+    const statusButtons = document.querySelectorAll('.change-item-status');
+    
+    statusButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const itemId = this.dataset.itemId;
+            const newStatus = this.dataset.status;
+            const statusMap = {
+                'active': 'Active',
+                'private': 'Private',
+                'off_sale': 'Off Sale',
+                'sold': 'Sold'
+            };
+            
+            if (confirm(`Are you sure you want to change this item to "${statusMap[newStatus]}"?`)) {
+                fetch(`/items/${itemId}/change-status/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `status=${newStatus}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`Item status changed to "${statusMap[newStatus]}" successfully!`);
+                        location.reload();
+                    } else {
+                        alert('Error: ' + (data.error || 'Failed to change status'));
+                    }
+                })
+                .catch(error => {
+                    alert('Error changing item status. Please try again.');
+                    console.error('Error:', error);
+                });
+            }
+        });
+    });
+
+    // Share Profile functionality
+    let searchTimeout;
+    const userSearchInput = document.getElementById('userSearchInput');
+    const userListContainer = document.getElementById('userListContainer');
+    const searchSpinner = document.getElementById('searchSpinner');
+    let profileUsername, profileUrl;
+
+    // Capture profile data when modal opens
+    document.getElementById('shareProfileModal').addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        profileUsername = button.dataset.profileUsername;
+        profileUrl = window.location.origin + button.dataset.profileUrl;
+        userSearchInput.value = '';
+        userListContainer.innerHTML = '<div class="text-center text-muted py-3"><i class="fas fa-search"></i> Start typing to search for users</div>';
+    });
+
+    // User search with debounce
+    userSearchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+        
+        if (query.length < 2) {
+            userListContainer.innerHTML = '<div class="text-center text-muted py-3"><i class="fas fa-search"></i> Start typing to search for users</div>';
+            return;
+        }
+
+        searchSpinner.style.display = 'block';
+        userListContainer.innerHTML = '';
+
+        searchTimeout = setTimeout(() => {
+            fetch(`/api/search-users/?q=${encodeURIComponent(query)}`, {
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                searchSpinner.style.display = 'none';
+                if (data.users && data.users.length > 0) {
+                    userListContainer.innerHTML = data.users.map(user => `
+                        <div class="user-item p-3 border-bottom" style="cursor: pointer; transition: background 0.2s;" 
+                             onmouseover="this.style.background='#f8f9fa'" 
+                             onmouseout="this.style.background='white'"
+                             onclick="shareProfile(${user.id}, '${user.username}')">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <strong>${user.username}</strong>
+                                </div>
+                                <i class="fas fa-paper-plane text-primary"></i>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    userListContainer.innerHTML = '<div class="text-center text-muted py-3"><i class="fas fa-user-slash"></i> No users found</div>';
+                }
+            })
+            .catch(error => {
+                searchSpinner.style.display = 'none';
+                userListContainer.innerHTML = '<div class="text-center text-danger py-3"><i class="fas fa-exclamation-circle"></i> Error searching users</div>';
+                console.error('Error:', error);
+            });
+        }, 300);
+    });
+
+    // Share profile function (made global)
+    window.shareProfile = function(recipientId, recipientUsername) {
+        const profileLink = `Check out ${profileUsername}'s profile: ${profileUrl}`;
+        
+        fetch('/messages/send/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `recipient_id=${recipientId}&content=${encodeURIComponent(profileLink)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('shareProfileModal'));
+                modal.hide();
+                alert(`Profile shared with ${recipientUsername}!`);
+            } else {
+                alert('Error: ' + (data.error || 'Failed to share profile'));
+            }
+        })
+        .catch(error => {
+            alert('Error sharing profile. Please try again.');
+            console.error('Error:', error);
+        });
+    };
+});
+</script>
+{% endblock %}

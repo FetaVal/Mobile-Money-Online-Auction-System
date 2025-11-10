@@ -1,0 +1,1203 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ item.title }} - AuctionHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .item-detail-container {
+        background: #f8f9fa;
+        min-height: 100vh;
+        padding: 40px 0;
+    }
+    
+    .item-main-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+    
+    .image-gallery {
+        position: relative;
+        background: #000;
+    }
+    
+    .main-image-container {
+        position: relative;
+        height: 500px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #000;
+    }
+    
+    .main-image {
+        max-width: 100%;
+        max-height: 500px;
+        object-fit: contain;
+    }
+    
+    .thumbnail-gallery {
+        display: flex;
+        gap: 10px;
+        padding: 15px;
+        background: #f8f9fa;
+        overflow-x: auto;
+    }
+    
+    .thumbnail {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        cursor: pointer;
+        border: 3px solid transparent;
+        transition: all 0.3s;
+    }
+    
+    .thumbnail:hover, .thumbnail.active {
+        border-color: #6366f1;
+        transform: scale(1.05);
+    }
+    
+    .item-info {
+        padding: 30px;
+    }
+    
+    .item-title {
+        font-size: 32px;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 10px;
+    }
+    
+    .item-category {
+        display: inline-block;
+        background: #e0e7ff;
+        color: #6366f1;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 20px;
+    }
+    
+    .price-section {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+    }
+    
+    .current-price-label {
+        font-size: 14px;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .current-price {
+        font-size: 42px;
+        font-weight: 800;
+        margin: 5px 0;
+    }
+    
+    .price-details {
+        display: flex;
+        gap: 20px;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid rgba(255,255,255,0.3);
+        font-size: 14px;
+    }
+    
+    .auction-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+    
+    .stat-box {
+        text-align: center;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+    
+    .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #6366f1;
+        display: block;
+    }
+    
+    .stat-label {
+        font-size: 13px;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 5px;
+    }
+    
+    .countdown-timer {
+        background: #fef3c7;
+        color: #92400e;
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+        margin-bottom: 25px;
+        font-weight: 600;
+    }
+    
+    .countdown-timer.ending-soon {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    
+    .bid-form-section {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+        margin-bottom: 30px;
+    }
+    
+    .bid-form-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #1a1a2e;
+    }
+    
+    .bid-btn {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        border: none;
+        padding: 15px 40px;
+        font-size: 18px;
+        font-weight: 600;
+        border-radius: 10px;
+        width: 100%;
+        transition: all 0.3s;
+    }
+    
+    .bid-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+    }
+    
+    .bid-btn:disabled {
+        background: #cbd5e1;
+        cursor: not-allowed;
+    }
+    
+    .winning-badge {
+        background: #10b981;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .description-section {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+        margin-bottom: 30px;
+    }
+    
+    .section-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #1a1a2e;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .bid-history {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+        margin-bottom: 30px;
+    }
+    
+    .bid-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        border-bottom: 1px solid #e2e8f0;
+        transition: background 0.3s;
+    }
+    
+    .bid-item:hover {
+        background: #f8f9fa;
+    }
+    
+    .bid-item:last-child {
+        border-bottom: none;
+    }
+    
+    .bid-user {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .bid-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+    }
+    
+    .bid-username {
+        font-weight: 600;
+        color: #1a1a2e;
+    }
+    
+    .bid-time {
+        font-size: 13px;
+        color: #94a3b8;
+    }
+    
+    .bid-amount {
+        font-size: 20px;
+        font-weight: 700;
+        color: #6366f1;
+    }
+    
+    .winning-bid-badge {
+        background: #10b981;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-left: 10px;
+    }
+    
+    .seller-info {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+        margin-bottom: 30px;
+    }
+    
+    .seller-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .seller-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+        font-weight: 700;
+    }
+    
+    .seller-name {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1a1a2e;
+    }
+    
+    .seller-rating {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: #fbbf24;
+        font-size: 14px;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #94a3b8;
+    }
+    
+    .empty-state i {
+        font-size: 48px;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+    
+    .review-item {
+        padding: 20px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .review-item:last-child {
+        border-bottom: none;
+    }
+    
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    .review-stars {
+        color: #fbbf24;
+    }
+    
+    .alert {
+        border-radius: 10px;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+    }
+    
+    .guarantee-section {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border: 2px solid #0ea5e9;
+        border-radius: 12px;
+        padding: 25px;
+        margin-top: 20px;
+    }
+    
+    .guarantee-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #0c4a6e;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .guarantee-item {
+        display: flex;
+        align-items: start;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(14, 165, 233, 0.2);
+    }
+    
+    .guarantee-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    
+    .guarantee-icon {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+    
+    .guarantee-content h4 {
+        font-size: 14px;
+        font-weight: 700;
+        color: #0c4a6e;
+        margin: 0 0 4px 0;
+    }
+    
+    .guarantee-content p {
+        font-size: 13px;
+        color: #475569;
+        margin: 0;
+        line-height: 1.5;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="item-detail-container">
+    <div class="container">
+        <div class="row">
+            <!-- Left Column: Images & Details -->
+            <div class="col-lg-8">
+                <!-- Main Item Card -->
+                <div class="item-main-card">
+                    <!-- Image Gallery -->
+                    <div class="image-gallery">
+                        <div class="main-image-container">
+                            {% if all_images %}
+                                <img src="{{ all_images.0.url }}" alt="{{ item.title }}" class="main-image" id="mainImage">
+                            {% else %}
+                                <img src="https://via.placeholder.com/600x400/6366f1/ffffff?text=No+Image" alt="No image" class="main-image" id="mainImage">
+                            {% endif %}
+                        </div>
+                        
+                        {% if all_images|length > 1 %}
+                        <div class="thumbnail-gallery">
+                            {% for image in all_images %}
+                                <img src="{{ image.url }}" alt="Thumbnail {{ forloop.counter }}" 
+                                     class="thumbnail {% if forloop.first %}active{% endif %}"
+                                     onclick="changeMainImage('{{ image.url }}', this)">
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Item Info -->
+                    <div class="item-info">
+                        <h1 class="item-title">{{ item.title }}</h1>
+                        
+                        {% if item.category %}
+                            <span class="item-category">{{ item.category.name }}</span>
+                        {% endif %}
+                        
+                        <!-- Price Section -->
+                        <div class="price-section">
+                            <div class="current-price-label">Current Bid</div>
+                            <div class="current-price">UGX {{ item.current_price|floatformat:0 }}</div>
+                            <div class="price-details">
+                                <div>Starting: UGX {{ item.starting_price|floatformat:0 }}</div>
+                                <div>Min Increment: UGX {{ item.min_increment|floatformat:0 }}</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Countdown Timer -->
+                        {% if item.status == 'active' %}
+                            <div class="countdown-timer {% if item.is_ending_soon %}ending-soon{% endif %}" id="countdown">
+                                ⏰ Ends in: Calculating...
+                            </div>
+                        {% else %}
+                            <div class="countdown-timer">
+                                🔒 Auction {{ item.get_status_display }}
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Auction Stats -->
+                        <div class="auction-stats">
+                            <div class="stat-box">
+                                <span class="stat-value">{{ item.bid_count }}</span>
+                                <span class="stat-label">Bids</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="stat-value">{{ item.view_count }}</span>
+                                <span class="stat-label">Views</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="stat-value">{{ item.time_remaining|default:"Ended" }}</span>
+                                <span class="stat-label">Time Left</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Description -->
+                <div class="description-section">
+                    <h2 class="section-title">
+                        📝 Description
+                    </h2>
+                    <p style="white-space: pre-line; line-height: 1.8; color: #475569;">{{ item.description }}</p>
+                </div>
+                
+                <!-- Bid History -->
+                <div class="bid-history">
+                    <h2 class="section-title">
+                        📊 Bid History
+                    </h2>
+                    
+                    {% if bids %}
+                        {% for bid in bids %}
+                            <div class="bid-item">
+                                <div class="bid-user">
+                                    {% if bid.bidder.profile.profile_picture %}
+                                        <img src="{{ bid.bidder.profile.profile_picture.url }}" alt="{{ bid.bidder.username }}" class="bid-avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #6366f1;">
+                                    {% else %}
+                                        <div class="bid-avatar">
+                                            {{ bid.bidder.username|slice:":1"|upper }}
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="bid-username">
+                                            {{ bid.bidder.username }}
+                                            {% if bid.is_winning %}
+                                                <span class="winning-bid-badge">🏆 Winning</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="bid-time">{{ bid.bid_time|timesince }} ago</div>
+                                    </div>
+                                </div>
+                                <div class="bid-amount">UGX {{ bid.amount|floatformat:0 }}</div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-gavel"></i>
+                            <p>No bids yet. Be the first to bid!</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Reviews Section -->
+                {% if reviews %}
+                <div class="bid-history">
+                    <h2 class="section-title">
+                        ⭐ Reviews
+                    </h2>
+                    
+                    {% for review in reviews %}
+                        <div class="review-item">
+                            <div class="review-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+                                {% if review.reviewer.profile.profile_picture %}
+                                    <img src="{{ review.reviewer.profile.profile_picture.url }}" alt="{{ review.reviewer.username }}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid #667eea;">
+                                {% else %}
+                                    <div style="width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700;">
+                                        {{ review.reviewer.username|slice:":1"|upper }}
+                                    </div>
+                                {% endif %}
+                                <div style="flex: 1;">
+                                    <strong>{{ review.reviewer.username }}</strong>
+                                    <div class="review-stars" style="margin-top: 4px;">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= review.rating %}⭐{% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            <p style="color: #64748b; margin: 0;">{{ review.comment }}</p>
+                            {% if review.review_image %}
+                                <div style="margin-top: 10px;">
+                                    <img src="{{ review.review_image.url }}" alt="Review image" style="max-width: 200px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                </div>
+                            {% endif %}
+                            <small style="color: #94a3b8;">{{ review.created_at|timesince }} ago</small>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <!-- Leave a Review Section -->
+                {% if user.is_authenticated and item.seller != user %}
+                    {% if user_has_bid %}
+                        {% if not user_has_reviewed %}
+                        <div class="bid-history">
+                            <h2 class="section-title">
+                                💬 Leave a Review
+                            </h2>
+                            
+                            <form method="post" action="{% url 'submit_review' item.pk %}" enctype="multipart/form-data" id="reviewForm">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label>{{ form.rating.label }}</label>
+                            <div class="rating-container" style="display: flex; gap: 10px; margin-top: 10px;">
+                                {% for value, label in form.rating.field.choices %}
+                                    <label style="cursor: pointer; padding: 10px 15px; background: #f8f9fa; border-radius: 8px; border: 2px solid #e2e8f0; transition: all 0.3s;" class="rating-option">
+                                        <input type="radio" name="rating" value="{{ value }}" required class="rating-input">
+                                        <span>{% for i in "12345" %}{% if forloop.counter <= value|add:0 %}⭐{% endif %}{% endfor %}</span>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                            {% if form.rating.errors %}
+                                <div class="text-danger mt-2">{{ form.rating.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            {{ form.comment.label_tag }}
+                            {{ form.comment }}
+                            {% if form.comment.errors %}
+                                <div class="text-danger mt-2">{{ form.comment.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            {{ form.review_image.label_tag }}
+                            {{ form.review_image }}
+                            {% if form.review_image.errors %}
+                                <div class="text-danger mt-2">{{ form.review_image.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                            <button type="submit" class="btn btn-primary btn-block" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); border: none; padding: 12px; font-weight: 600; border-radius: 8px;">
+                                Submit Review
+                            </button>
+                        </form>
+                    </div>
+                        {% else %}
+                        <div class="bid-history">
+                            <div class="empty-state">
+                                <i class="fas fa-check-circle"></i>
+                                <p>You've already reviewed this seller. Thank you for your feedback!</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="bid-history">
+                            <div class="empty-state">
+                                <i class="fas fa-info-circle"></i>
+                                <p>Place a bid on this item to leave a review for the seller.</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+            
+            <!-- Right Column: Bid Form & Seller Info -->
+            <div class="col-lg-4">
+                <!-- Seller Info -->
+                <div class="seller-info">
+                    <h3 class="section-title" style="font-size: 18px;">👤 Seller</h3>
+                    <a href="{% url 'seller_profile' item.seller.username %}" style="text-decoration: none; color: inherit;">
+                        <div class="seller-header" style="cursor: pointer; transition: all 0.3s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                            {% if item.seller.profile.profile_picture %}
+                                <img src="{{ item.seller.profile.profile_picture.url }}" alt="{{ item.seller.username }}" class="seller-avatar" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid #e5e7eb;">
+                            {% else %}
+                                <div class="seller-avatar">
+                                    {{ item.seller.username|slice:":1"|upper }}
+                                </div>
+                            {% endif %}
+                            <div>
+                                <div class="seller-name">{{ item.seller.username }}</div>
+                                <div class="seller-rating">
+                                    {% if seller_rating > 0 %}
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= seller_rating %}⭐{% else %}☆{% endif %}
+                                        {% endfor %}
+                                        <span style="color: #64748b;">({{ seller_review_count }})</span>
+                                    {% else %}
+                                        <span style="color: #94a3b8;">No ratings yet</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    {% if item.seller.profile.bio %}
+                        <div style="margin-top: 15px; padding: 12px; background: #f8fafc; border-radius: 8px; border-left: 3px solid #6366f1;">
+                            <p style="margin: 0; color: #475569; font-size: 14px; line-height: 1.5;">{{ item.seller.profile.bio }}</p>
+                        </div>
+                    {% endif %}
+                    
+                    <div style="display: flex; gap: 8px; margin-top: 12px;">
+                        <a href="{% url 'seller_profile' item.seller.username %}" class="btn btn-outline-primary btn-sm" style="flex: 1;">
+                            View Seller Profile
+                        </a>
+                        {% if user.is_authenticated and item.seller != user %}
+                            <a href="{% url 'start_conversation' item.seller.id %}" class="btn btn-success btn-sm" style="flex: 1;">
+                                <i class="fas fa-comments"></i> Chat with Seller
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Bid Form -->
+                {% if user.is_authenticated %}
+                    {% if item.seller == user %}
+                        <div class="bid-form-section">
+                            <div class="alert alert-info">
+                                ℹ️ This is your listing. You cannot bid on your own item.
+                            </div>
+                        </div>
+                    {% elif item.status != 'active' %}
+                        <div class="bid-form-section">
+                            <div class="alert alert-warning">
+                                🔒 This auction is {{ item.get_status_display|lower }}.
+                            </div>
+                        </div>
+                    {% elif item.status == 'sold' and item.winner == request.user %}
+                        <div class="bid-form-section">
+                            <div class="winning-badge" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                🎉 Congratulations! You won this auction!
+                            </div>
+                            <a href="{% url 'cart_add' item.pk %}" class="btn btn-primary btn-block" style="margin-top: 15px; padding: 15px; font-size: 18px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none;">
+                                🛒 Add to Cart
+                            </a>
+                            <p style="text-align: center; margin-top: 10px; color: #6b7280; font-size: 14px;">
+                                Add this item to your cart to proceed with checkout
+                            </p>
+                        </div>
+                    {% else %}
+                        <div class="bid-form-section">
+                            {% if is_highest_bidder %}
+                                <div class="winning-badge">
+                                    🏆 You're currently winning!
+                                </div>
+                            {% endif %}
+                            
+                            <h3 class="bid-form-title">Place Your Bid</h3>
+                            
+                            <form method="post" action="{% url 'place_bid' item.pk %}">
+                                {% csrf_token %}
+                                
+                                <div class="form-group">
+                                    {{ bid_form.amount.label_tag }}
+                                    {{ bid_form.amount }}
+                                    {% if bid_form.amount.errors %}
+                                        <div class="text-danger mt-2">
+                                            {{ bid_form.amount.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">
+                                        Minimum bid: UGX {{ min_bid|floatformat:0 }}
+                                    </small>
+                                </div>
+                                
+                                <button type="submit" class="bid-btn">
+                                    🎯 Place Bid
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <!-- Buy Now Button -->
+                        {% if show_buy_now %}
+                            <div class="bid-form-section" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                                    <div>
+                                        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 5px;">⚡ Skip the Wait</div>
+                                        <div style="font-size: 32px; font-weight: 800;">UGX {{ item.buy_now_price|floatformat:0 }}</div>
+                                    </div>
+                                    <div style="font-size: 52px;">🛍️</div>
+                                </div>
+                                <form method="post" action="{% url 'buy_now' item.pk %}" style="margin: 0;">
+                                    {% csrf_token %}
+                                    <button type="submit" style="width: 100%; padding: 18px; background: white; color: #059669; border: none; border-radius: 10px; font-size: 18px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'">
+                                        💳 Buy Now - Get It Instantly
+                                    </button>
+                                </form>
+                                <div style="margin-top: 15px; font-size: 14px; text-align: center; opacity: 0.95; background: rgba(255,255,255,0.15); padding: 12px; border-radius: 8px;">
+                                    ✨ Purchase immediately and skip the auction wait
+                                </div>
+                                <div style="margin-top: 10px; font-size: 12px; text-align: center; opacity: 0.85;">
+                                    ⚠️ Buy Now option is hidden once bidding starts
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                {% else %}
+                    <div class="bid-form-section">
+                        <h3 class="bid-form-title">Want to Bid?</h3>
+                        <p style="color: #64748b; margin-bottom: 20px;">
+                            Please log in to place a bid on this item.
+                        </p>
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="bid-btn" style="display: block; text-align: center; text-decoration: none;">
+                            🔐 Login to Bid
+                        </a>
+                    </div>
+                {% endif %}
+                
+                <!-- AuctionHub Guarantee -->
+                <div class="guarantee-section">
+                    <div class="guarantee-title">
+                        <i class="fas fa-shield-alt"></i>
+                        AuctionHub Guarantee
+                    </div>
+                    
+                    <div class="guarantee-item">
+                        <div class="guarantee-icon">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <div class="guarantee-content">
+                            <h4>Secure Payment</h4>
+                            <p>All payments are encrypted and processed through secure channels</p>
+                        </div>
+                    </div>
+                    
+                    <div class="guarantee-item">
+                        <div class="guarantee-icon">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <div class="guarantee-content">
+                            <h4>Buyer Protection</h4>
+                            <p>Your purchase is protected with our comprehensive buyer guarantee</p>
+                        </div>
+                    </div>
+                    
+                    <div class="guarantee-item">
+                        <div class="guarantee-icon">
+                            <i class="fas fa-undo-alt"></i>
+                        </div>
+                        <div class="guarantee-content">
+                            <h4>Money-Back Guarantee</h4>
+                            <p>Get your money back if item doesn't match description</p>
+                        </div>
+                    </div>
+                    
+                    <div class="guarantee-item">
+                        <div class="guarantee-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="guarantee-content">
+                            <h4>Quality Verified</h4>
+                            <p>All sellers are verified and items undergo quality checks</p>
+                        </div>
+                    </div>
+                    
+                    <div class="guarantee-item">
+                        <div class="guarantee-icon">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                        <div class="guarantee-content">
+                            <h4>24/7 Support</h4>
+                            <p>Our customer support team is always here to help you</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CAPTCHA Challenge Modal -->
+<div class="modal fade" id="captchaModal" tabindex="-1" role="dialog" aria-labelledby="captchaModalLabel" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" style="border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px 15px 0 0;">
+                <h5 class="modal-title" id="captchaModalLabel">
+                    <i class="fas fa-shield-alt"></i> Security Verification Required
+                </h5>
+            </div>
+            <div class="modal-body" style="padding: 30px;">
+                <div class="alert alert-info" style="border-radius: 10px;">
+                    <i class="fas fa-info-circle"></i> We detected unusual bidding activity. Please complete this quick verification to continue.
+                </div>
+                <form id="captchaForm" method="post" action="{% url 'verify_captcha' item.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="bid_amount" id="captcha_bid_amount">
+                    <div class="form-group text-center">
+                        <div id="captcha_container">
+                            <!-- CAPTCHA will be loaded here -->
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="captcha_1" style="font-weight: 600;">Enter the answer:</label>
+                        <input type="text" class="form-control" id="captcha_1" name="captcha_1" required 
+                               style="font-size: 18px; text-align: center; padding: 12px; border-radius: 8px;">
+                    </div>
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-success btn-lg" style="border-radius: 25px; padding: 12px 40px;">
+                            <i class="fas fa-check-circle"></i> Verify & Continue
+                        </button>
+                    </div>
+                </form>
+                <div class="text-center mt-3">
+                    <small class="text-muted">This helps us prevent automated bidding and keeps auctions fair.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Image Gallery
+function changeMainImage(imageUrl, thumbnail) {
+    document.getElementById('mainImage').src = imageUrl;
+    document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+    thumbnail.classList.add('active');
+}
+
+// Countdown Timer
+function updateCountdown() {
+    const endTime = new Date("{{ item.end_time|date:'c' }}").getTime();
+    const now = new Date().getTime();
+    const distance = endTime - now;
+    
+    const countdownEl = document.getElementById('countdown');
+    if (!countdownEl) return;
+    
+    if (distance < 0) {
+        countdownEl.innerHTML = '🔒 Auction Ended';
+        countdownEl.classList.add('ending-soon');
+        return;
+    }
+    
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+    
+    let timeString = '⏰ Ends in: ';
+    if (days > 0) {
+        timeString += `${days}d ${hours}h ${minutes}m`;
+    } else if (hours > 0) {
+        timeString += `${hours}h ${minutes}m ${seconds}s`;
+    } else {
+        timeString += `${minutes}m ${seconds}s`;
+        countdownEl.classList.add('ending-soon');
+    }
+    
+    countdownEl.innerHTML = timeString;
+}
+
+{% if item.status == 'active' %}
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+{% endif %}
+
+// Real-time bidding WebSocket
+{% if item.status == 'active' %}
+const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const wsUrl = `${protocol}//${window.location.host}/ws/auction/{{ item.id }}/`;
+let auctionSocket = null;
+let reconnectAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 5;
+
+function connectWebSocket() {
+    try {
+        auctionSocket = new WebSocket(wsUrl);
+        
+        auctionSocket.onopen = function(e) {
+            console.log('WebSocket connected for real-time bidding');
+            reconnectAttempts = 0;
+            document.getElementById('connection-status')?.classList.remove('disconnected');
+        };
+        
+        auctionSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            
+            switch(data.type) {
+                case 'auction_state':
+                case 'auction_update':
+                    updateAuctionUI(data);
+                    break;
+                case 'new_bid':
+                    handleNewBid(data.bid);
+                    break;
+                case 'error':
+                    showBidError(data.message);
+                    break;
+            }
+        };
+        
+        auctionSocket.onerror = function(e) {
+            console.error('WebSocket error:', e);
+        };
+        
+        auctionSocket.onclose = function(e) {
+            console.log('WebSocket connection closed');
+            document.getElementById('connection-status')?.classList.add('disconnected');
+            
+            // Attempt to reconnect
+            if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                reconnectAttempts++;
+                setTimeout(connectWebSocket, 2000 * reconnectAttempts);
+            }
+        };
+    } catch (error) {
+        console.error('Failed to create WebSocket:', error);
+    }
+}
+
+function updateAuctionUI(data) {
+    // Update current price
+    const priceEl = document.querySelector('.current-price');
+    if (priceEl && data.current_price) {
+        priceEl.textContent = `UGX ${parseFloat(data.current_price).toLocaleString()}`;
+    }
+    
+    // Update bid count
+    const bidCountEl = document.querySelector('.bid-count');
+    if (bidCountEl && data.bid_count !== undefined) {
+        bidCountEl.textContent = `${data.bid_count} bids`;
+    }
+    
+    // Update latest bids list
+    if (data.latest_bids && data.latest_bids.length > 0) {
+        updateBidsList(data.latest_bids);
+    }
+}
+
+function handleNewBid(bidData) {
+    // Update UI with new bid
+    const priceEl = document.querySelector('.current-price');
+    if (priceEl && bidData.current_price) {
+        priceEl.textContent = `UGX ${parseFloat(bidData.current_price).toLocaleString()}`;
+        priceEl.classList.add('price-update');
+        setTimeout(() => priceEl.classList.remove('price-update'), 500);
+    }
+    
+    // Update bid count
+    const bidCountEl = document.querySelector('.bid-count');
+    if (bidCountEl && bidData.bid_count) {
+        bidCountEl.textContent = `${bidData.bid_count} bids`;
+    }
+    
+    // Show notification
+    showBidNotification(bidData);
+}
+
+function updateBidsList(bids) {
+    const bidsContainer = document.querySelector('.recent-bids-list, .bid-history');
+    if (!bidsContainer) return;
+    
+    bidsContainer.innerHTML = bids.map(bid => `
+        <div class="bid-item">
+            <div class="bid-user">
+                <i class="fas fa-user-circle"></i> ${escapeHtml(bid.bidder)}
+            </div>
+            <div class="bid-amount">UGX ${parseFloat(bid.amount).toLocaleString()}</div>
+            <div class="bid-time">${formatBidTime(bid.time)}</div>
+        </div>
+    `).join('');
+}
+
+function showBidNotification(bidData) {
+    const notification = document.createElement('div');
+    notification.className = 'bid-notification';
+    notification.innerHTML = `
+        <i class="fas fa-gavel"></i>
+        New bid by <strong>${escapeHtml(bidData.bidder)}</strong>: 
+        UGX ${parseFloat(bidData.amount).toLocaleString()}
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 100);
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+function showBidError(message) {
+    const errorEl = document.getElementById('bid-error');
+    if (errorEl) {
+        errorEl.textContent = message;
+        errorEl.style.display = 'block';
+        setTimeout(() => errorEl.style.display = 'none', 5000);
+    } else {
+        alert(message);
+    }
+}
+
+function formatBidTime(isoString) {
+    const date = new Date(isoString);
+    const now = new Date();
+    const diff = Math.floor((now - date) / 1000);
+    
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return `${Math.floor(diff / 86400)}d ago`;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Enhanced bid form submission via WebSocket
+const bidForm = document.querySelector('form[action*="place_bid"]');
+if (bidForm) {
+    bidForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (!auctionSocket || auctionSocket.readyState !== WebSocket.OPEN) {
+            alert('Real-time connection not available. Please refresh the page.');
+            return;
+        }
+        
+        const bidInput = this.querySelector('input[name="bid_amount"]');
+        const bidAmount = bidInput ? bidInput.value : null;
+        
+        if (!bidAmount || parseFloat(bidAmount) <= 0) {
+            showBidError('Please enter a valid bid amount');
+            return;
+        }
+        
+        auctionSocket.send(JSON.stringify({
+            type: 'place_bid',
+            amount: parseFloat(bidAmount)
+        }));
+        
+        bidInput.value = '';
+    });
+}
+
+// Connect WebSocket
+connectWebSocket();
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+    if (auctionSocket) {
+        auctionSocket.close();
+    }
+});
+{% endif %}
+
+// Rating Stars Interactive
+const ratingOptions = document.querySelectorAll('.rating-option');
+ratingOptions.forEach(option => {
+    const radio = option.querySelector('.rating-input');
+    
+    // Update visual state when radio changes
+    if (radio) {
+        radio.addEventListener('change', function() {
+            ratingOptions.forEach(opt => {
+                opt.style.background = '#f8f9fa';
+                opt.style.borderColor = '#e2e8f0';
+            });
+            option.style.background = '#fef3c7';
+            option.style.borderColor = '#fbbf24';
+        });
+    }
+    
+    // Handle label click
+    option.addEventListener('click', function(e) {
+        if (e.target.tagName !== 'INPUT') {
+            if (radio) {
+                radio.checked = true;
+                radio.dispatchEvent(new Event('change'));
+            }
+        }
+    });
+});
+
+// Auto-launch CAPTCHA modal if soft challenge triggered
+{% if show_captcha %}
+    $(document).ready(function() {
+        // Load CAPTCHA using django-simple-captcha's refresh endpoint
+        fetch('/captcha/refresh/', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                // Update the captcha container with the new CAPTCHA
+                document.getElementById('captcha_container').innerHTML = `
+                    <input type="hidden" name="captcha_0" value="${data.key}">
+                    <img src="${data.image_url}" alt="CAPTCHA" style="border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin: 20px 0;">
+                `;
+                
+                // Show the modal
+                $('#captchaModal').modal('show');
+            })
+            .catch(error => {
+                console.error('Failed to load CAPTCHA:', error);
+                alert('Failed to load security verification. Please refresh the page and try again.');
+            });
+    });
+{% endif %}
+</script>
+{% endblock %}
